@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
+// moza
 // Définition des structures pour gérer la mémoire secondaire et les fichiers
 typedef struct enre {
     int dep;
