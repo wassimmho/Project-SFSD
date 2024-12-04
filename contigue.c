@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>//rgzehzrjzrjetjettzjk<ekze
+#include <stdbool.h>
 
 // Définition des structures pour gérer la mémoire secondaire et les fichiers
 typedef struct enre {
