@@ -116,29 +116,57 @@ MSCHheadCH* createLinkedList(int *allocat, int n, int m) {
 
 
 //---------------------------------------------------------------------------------------------------
-void initializeDisk(int *NB, int *FB, int **vector) {
-int i=0;
+void initializeDisk(int *NB, int *FB,int *Orga, int **vector) {
+    int i=0;
     do{
-        if (i>=2)
+        if (i>=1)
         {
-            printf("ensure that total number of blocks and the block size factor are both > or = 1 ");
+            printf("ensure that the block size factor is > or = 1 \n");
         }
         
-    printf("Enter the total number of blocks: ");
-    scanf("%d", NB);
-    printf("Enter the block size factor: ");
-    scanf("%d", FB);
+        printf("Enter the block size factor: \n");
+        scanf("%d", FB);
+
+        i++;
+    }while (*FB<=0 );
+
+    i=0;
+
+    do{
+        if (i>=1)
+        {
+            printf("ensure that total number of blocks is > or = 1 \n");
+        }
+        
+        printf("Enter the total number of blocks: \n");
+        scanf("%d", NB);
 
     i++;
-    }while (FB<=0 && NB<=0);
-    
+    }while (*NB<=0);
+
+    i=0;
+
+    do{
+        if (i>=1)
+        {
+            printf("Invalid input! Please enter **1** for **Chainer** or **0** for **Contigue**. \n");
+        }
+        
+        printf("Please choose an organization method for your data:\n- Enter **1** for **Chainer**.\n- Enter **0** for **Contigue**.  \n");
+        scanf("%d", Orga);
+
+    i++;
+    }while (*Orga!=0 && *Orga!=1);
+
+
+
     *vector = (int*)malloc(*NB * sizeof(int));
     if (*vector == NULL) {
         printf("Memory allocation failed\n");
         exit(1);
     }
 
-    meMSCHet(*vector, 0, *NB * sizeof(int));
+    memset(*vector, 0, *NB * sizeof(int));
     printf("allocation table initialized with %d cells, all set to 0.\n", *NB);
 }
 //----------------------------------------------------------------------------------------------------------
@@ -177,23 +205,21 @@ int main() {
 
     //Var---------------------------------------------------------------------------------------------------------------
 
-    int NB, FB;
+    int NB, FB,organizationMode;
     int *allocation = NULL;
 
     // Initialize the disk--------------------------------------------------------------------------------------------------------
-    initializeDisk(&NB, &FB, &allocation);
+    initializeDisk(&NB, &FB,&organizationMode, &allocation);
 
 
 
-
+    if (organizationMode == 1)
+    {
+        
     // Create the linked list
     MSCHheadCH* head = createLinkedList(allocation, NB, FB);
     
-
-
-
-    
- // Access and print the first value of `alloca`
+    // Access and print the first value of `alloca`
     if (head != NULL && head->alloca != NULL) { // Ensure `head` and `alloca` are valid
         printf("First value in allica: %d\n", head->alloca[0]); // Print the first cell content
     } else {
@@ -204,6 +230,9 @@ int main() {
     // Free allocated memory---------------------------------------------------------------------------------------------------------
     free(allocation);
     freeLinkedList(head);
+   
+    }
+    
     
 
     return 0;
