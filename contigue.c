@@ -46,7 +46,7 @@ MShead* createContiguousMemory(int *allocat, int n, int m) {
         exit(1);
     }
 
-    // Création des blocs de mémoire secondaire 
+    // Création des blocs de mémoire secondaire //commentairetest
     for (int i = 0; i < n; i++) {
         head->blocks[i].id = i + 1; // Assigner un ID unique à chaque bloc
         head->blocks[i].entries = (enre*)malloc(m * sizeof(enre)); // Allocation des enregistrements pour chaque bloc
