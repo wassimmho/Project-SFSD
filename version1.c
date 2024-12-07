@@ -173,7 +173,7 @@ int main() {
     initializeDisk(&NB, &FB, &organizationMode, &allocation);
 
     if (organizationMode == 1) {
-        // Create the linked list
+        // Organization chainee
         MSCHheadCH* head = createLinkedList(allocation, NB, FB);
         
         // Access and print the first value of `alloca`
@@ -187,6 +187,7 @@ int main() {
         free(allocation);
         freeLinkedList(head);
     }else{
+        // CONTIGUE
         printf("mo7ssin hna plassa te3 les fonctions ta3ek ida 7ebite");
     }
 
