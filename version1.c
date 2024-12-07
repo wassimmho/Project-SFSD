@@ -186,6 +186,8 @@ int main() {
         // Free allocated memory---------------------------------------------------------------------------------------------------------
         free(allocation);
         freeLinkedList(head);
+    }else{
+        printf("mo7ssin hna plassa te3 les fonctions ta3ek ida 7ebite");
     }
 
     return 0;
