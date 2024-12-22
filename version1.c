@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------------------------------------------------------------------------------------
 typedef struct enre {
     int dep;
-    char data[100]; // stam et moza
+    char data; // stam et moza
 } enre;
 
 typedef struct Block {
@@ -32,6 +32,8 @@ typedef struct Meta {
     bool Global;
     bool Intern;
 } Meta;
+
+
 
 //*********************************************************************************************************  CREAT FUNCTION ***********************************************
 MSCHheadCH* createLinkedList(int *allocat, int n, int m) {
