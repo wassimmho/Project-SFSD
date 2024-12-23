@@ -4,194 +4,186 @@
 #include <stdbool.h>
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------
+// Define `MSCH` first
+
+
 typedef struct enre {
-    int dep;
-    char data; // stam et moza
+    char data;       // Data
+    int id;          // Block ID
+    bool deleted;    // Logical deletion
 } enre;
 
 typedef struct Block {
-    int id;           // Block ID
-    enre *entries;    // Dynamic array of enre
+    int id;          // Block ID
+    enre* entries;   // Dynamic array of `enre`
+    int next;        // Next block ID or -1 if last block
 } Block;
 
-typedef struct MSCHheadCH {
-    int* alloca; 
-    struct MSCH* next; //type raho MSCH prsq f fonction bach te5den list pointer MSCH maye9derch yedi 9ima te3 pointer MSCHheadCH donc bedelte bach ne9der ndir assignement
-} MSCHheadCH;
-
 typedef struct MSCH {
-    Block block;
-    struct MSCH* next;
+    struct Block* block;   // Dynamic array of blocks
 } MSCH;
 
 typedef struct Meta {
-    char name[50];
-    int filesizeBlock;
-    int filesizeEnre;
-    MSCH* firstblockaddress;
-    bool Global;
-    bool Intern;
+    char name[50];           // File name
+    int filesizeBlock;       // File size in blocks
+    int filesizeEnre;        // File size in entries
+    int firstblockaddress;   // Address of the first block
+    bool Global;             // Organization mode (1 = chained, 0 = contiguous)
+    bool Intern;             // Sorted entries (1 = sorted, 0 = unsorted)
 } Meta;
 
+typedef struct MSheadCH {
+    int* alloca;             // Allocation array
+    Meta* meta;              // Meta data array
+    MSCH* body;              // MSCH body
+} MSheadCH;
 
+//*********************************************************************************************************  Create Function ***********************************************
+MSheadCH* createMS(int* allocat, int n, int m) {
 
-//*********************************************************************************************************  CREAT FUNCTION ***********************************************
-MSCHheadCH* createLinkedList(int *allocat, int n, int m) {
-    //-------------------------------------------------------------------------------------------- Creat Head node  ------------------------------------------------
-    MSCHheadCH* head = (MSCHheadCH*)malloc(sizeof(MSCHheadCH));
+    // Allocate memory for the head structure
+    MSheadCH* head = (MSheadCH*)malloc(sizeof(MSheadCH));
     if (!head) {
-        printf("Memory allocation failed\n");
+        printf("Memory allocation failed for head\n");
         exit(1);
     }
 
-    //-------------------------------------------------------------------------------------------- link allocation table + next pointer=NULL  ------------------------------------------------
+    // Assign the allocation table and its size
     head->alloca = allocat;
-    head->next = NULL;
-    
-    MSCH* NOADIN = (MSCH*)malloc(sizeof(MSCH));
-    if (!NOADIN) {
-        printf("Memory allocation failed\n");
+
+    // Allocate memory for the MSCH structure (body)
+    MSCH* body = (MSCH*)malloc(sizeof(MSCH));
+    if (!body) {
+        printf("Memory allocation failed for body\n");
+        free(head);
         exit(1);
     }
 
-    //-------------------------------------------------------------------------------------------- Creat nodes  ------------------------------------------------
-    for (int i = 0; i < n; i++) {
-        MSCH* NOADnext = (MSCH*)malloc(sizeof(MSCH));
-        if (!NOADnext) {
-            printf("Memory allocation failed\n");
-            exit(1);
-        }
-
-        //-------------------------------------------------------------------------------------------- ID OF Block + allocate structure array  ------------------------------------------------
-        NOADnext->block.id = i + 1; // Assign a unique ID to each block
-        NOADnext->block.entries = (enre*)malloc(m * sizeof(enre)); // Example: n entries per block
-        if (!NOADnext->block.entries) {
-            printf("Memory allocation for entries failed\n");
-            exit(1);
-        }
-
-        //-------------------------------------------------------------------------------------------- ID OF STRUCTURES ------------------------------------------------
-        for (int j = 0; j < m; j++) {
-            NOADnext->block.entries[j].dep = j + 1;
-        }
-
-        //-------------------------------------------------------------------------------------------- Give last node next pointer value Null ( node le5er ge3 f la liste mayepwanti 3la walo) ------------------------------------------------
-        NOADnext->next = NULL; // No next node yet
-
-        //-------------------------------------------------------------------------------------------- 1/- Ylesse9 head m3a first node ------------------------------------------------
-        //-------------------------------------------------------------------------------------------- 2/- ye5dem node w ylesse9ha direct m3a li 9belha  ------------------------------------------------
-        //-------------------------------------------------------------------------------------------- 3/- ybedel la valeur te3 pointeur bach yweli current node hya node le5ra li 5demnaha   ------------------------------------------------
-        if (i == 0) {
-            head->next = NOADnext; // Link the first node to the head
-        } else {
-            NOADIN->next = NOADnext; // Link the previous node to the current one
-        }
-
-        NOADIN = NOADnext; // Move to the current node
+    // Allocate memory for the blocks array
+    Block* blocks = (Block*)malloc(n * sizeof(Block));
+    if (!blocks) {
+        printf("Memory allocation failed for blocks\n");
+        free(body);
+        free(head);
+        exit(1);
     }
 
+    // Initialize each block
+    for (int i = 0; i < n; i++) {
+        blocks[i].id = i + 1;   // Assign block IDs
+        blocks[i].next = -1;    // No next block by default
+
+        // Allocate memory for entries in the block
+        blocks[i].entries = (enre*)malloc(m * sizeof(enre));
+        if (!blocks[i].entries) {
+            printf("Memory allocation failed for entries in block %d\n", i + 1);
+            for (int j = 0; j < i; j++) { // Free previous blocks
+                free(blocks[j].entries);
+            }
+            free(blocks);
+            free(body);
+            free(head);
+            exit(1);
+        }
+
+        // Initialize entries in the block
+        for (int j = 0; j < m; j++) {
+            blocks[i].entries[j].id = j + 1; // Assign entry IDs
+            blocks[i].entries[j].data = '\0';    // No data initially
+        }
+    }
+
+    // Assign blocks to the body
+    body->block = blocks;
+
+    // Link the body to the head
+    head->body = body;
+
+    printf("MS structure created with %d blocks, each containing %d entries.\n", n, m);
     return head;
+
 }
 
 //************************************************************************************************************************************************************************************************************** 
-void initializeDisk(int *NB, int *FB, int *Orga, int **vector) {
-    int i = 0;
+void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
     do {
-        if (i >= 1) {
-            printf("ensure that the block size factor is > or = 1 \n");
-        }
-        
-        printf("Enter the block size factor: \n");
+        printf("Enter the block size factor (> 0): ");
         scanf("%d", FB);
-
-        i++;
     } while (*FB <= 0);
 
-    i = 0;
-
     do {
-        if (i >= 1) {
-            printf("ensure that total number of blocks is > or = 1 \n");
-        }
-        
-        printf("Enter the total number of blocks: \n");
+        printf("Enter the total number of blocks (> 0): ");
         scanf("%d", NB);
-
-        i++;
     } while (*NB <= 0);
 
-    i = 0;
-
     do {
-        if (i >= 1) {
-            printf("Invalid input! Please enter **1** for **Chainer** or **0** for **Contigue**. \n");
-        }
-        
-        printf("Please choose an organization method for your data:\n- Enter **1** for **Chainer**.\n- Enter **0** for **Contigue**.  \n");
+        printf("Choose data organization (1 = Chained, 0 = Contiguous): ");
         scanf("%d", Orga);
-
-        i++;
     } while (*Orga != 0 && *Orga != 1);
 
+    do {
+        printf("Choose internal organization (1 = Sorted, 0 = Unsorted): ");
+        scanf("%d", inter);
+    } while (*inter != 0 && *inter != 1);
+
     *vector = (int*)malloc(*NB * sizeof(int));
-    if (*vector == NULL) {
+    if (!*vector) {
         printf("Memory allocation failed\n");
         exit(1);
     }
 
     memset(*vector, 0, *NB * sizeof(int));
-    printf("allocation table initialized with %d cells, all set to 0.\n", *NB);
+    printf("Allocation table initialized with %d cells, all set to 0.\n", *NB);
 }
 
-//----------------------------------------------------------------------------------------------------------
-void freeLinkedList(MSCHheadCH* head) {
-    if (head == NULL) {
-        return; // Nothing to free
-    }
+//***************************************************************************************************************************************************** 
+void freeMS(MSheadCH* head,int n) {
+    if (head == NULL) return;
 
-    MSCH* current = head->next; 
-    while (current != NULL) {
-        MSCH* nextNode = current->next; 
+    // Free allocation table
+    free(head->alloca);
 
-        if (current->block.entries != NULL) {
-            free(current->block.entries);
+    // Free metadata
+    free(head->meta);
+
+    // Free blocks
+    if (head->body != NULL) {
+        if (head->body->block != NULL) {
+            for (int i = 0; i < n; i++) {
+                free(head->body->block[i].entries);
+            }
+            free(head->body->block);
         }
-
-        free(current);
-
-        current = nextNode;
+        free(head->body);
     }
 
+    // Free head
     free(head);
 }
+
 //***************************************************************************************************************************************************** 
-
 int main() {
-    //Var---------------------------------------------------------------------------------------------------------------
-    int NB, FB, organizationMode;
-    int *allocation = NULL;
+    FILE *MC;
+    int NB, FB, organizationMode, interne;
+    int* allocation = NULL;
 
-    // Initialize the disk--------------------------------------------------------------------------------------------------------
-    initializeDisk(&NB, &FB, &organizationMode, &allocation);
+    // Initialize disk
+    initializeDisk(&NB, &FB, &organizationMode, &interne, &allocation);
 
     if (organizationMode == 1) {
-        // Organization chainee
-        MSCHheadCH* head = createLinkedList(allocation, NB, FB);
-        
-        // Access and print the first value of `alloca`
-        if (head != NULL && head->alloca != NULL) { // Ensure `head` and `alloca` are valid
-            printf("First value in allica: %d\n", head->alloca[0]); // Print the first cell content
+        MSheadCH* head = createMS(allocation, NB, FB);
+
+        if (head && head->alloca) {
+            printf("First value in allocation table: %d\n", head->alloca[0]);
         } else {
-            printf("Linked list creation failed or `alloca` is empty.\n");
+            printf("Linked list creation failed or allocation table is empty.\n");
         }
 
-        // Free allocated memory---------------------------------------------------------------------------------------------------------
-        free(allocation);
-        freeLinkedList(head);
-    }else{
-        // CONTIGUE
-        printf("mo7ssin hna plassa te3 les fonctions ta3ek ida 7ebite");
+        freeMS(head,NB);
+    } else {
+        printf("Contiguous organization not implemented yet.\n");
     }
 
+    free(allocation);
     return 0;
 }
