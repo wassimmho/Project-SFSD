@@ -228,12 +228,89 @@ printf("File has been successfully renamed to '%s'.\n", newname);
 
 //*********************************************************************************************************  Main function
 int main() {
+
+// VARIABLES--
+
     FILE *MC;
-    int NB, FB, organizationMode, interne;
+    int NB, FB, organizationMode, interne,desition,filenumber;
     int* allocation = NULL;
     char name[50];
     char newname[50];
-    // Initialize disk
+    while (true)
+    {
+    printf("Please select an operation:\n");
+    printf("1 - Initialize system\n");
+    printf("2 - Create a new file\n");
+    printf("3 - Rename a file\n");
+    printf("4 - Add a record\n");
+    printf("5 - Search for record by ID\n");
+    printf("6 - Logically delete a record\n");
+    printf("7 - Physically delete a record\n");
+    printf("8 - Defragmentation\n");
+    printf("9 - Print file content\n");
+    printf("10 - Save file to disk\n");
+    printf("11 - Delete a file\n");
+    printf("12 - Clear memory structure\n");
+    printf("13 - Exit\n");
+
+    scanf("%d", &desition);
+
+      switch (desition)
+      {
+      case 1:
+            printf("Initializing system...\n");
+            initializeDisk(&NB, &FB, &organizationMode, &interne, &allocation);
+            MSheadCH* head = createMS(allocation, NB, FB);
+            break;
+        case 2:
+            printf("Creating a new file...\n");
+            createfile(head,name,20, &organizationMode, &interne,&head->numberoffiles,&FB);
+            break;
+        case 3:
+            printf("Renaming a file...\n");
+            printf("please enter the file number that you want to rename");
+            scanf("%d", &filenumber);
+            Renamefile(head,newname,filenumber,head->numberoffiles);
+            break;
+        case 4:
+            printf("Adding a record...\n");
+            break;
+        case 5:
+            printf("Searching for record by ID...\n");
+            break;
+        case 6:
+            printf("Logically deleting a record...\n");
+            break;
+        case 7:
+            printf("Physically deleting a record...\n");
+            break;
+        case 8:
+            printf("Defragmenting...\n");
+            break;
+        case 9:
+            printf("Printing file content...\n");
+            break;
+        case 10:
+            printf("Saving file to disk...\n");
+            break;
+        case 11:
+            printf("Deleting a file...\n");
+            break;
+        case 12:
+            printf("Clearing memory structure...\n");
+            freeMS(head,NB);
+            break;
+        case 13:
+            printf("Exiting the program. Goodbye!\n");
+            exit(0);
+        default:
+            printf("Invalid choice. Please select a valid operation.\n");
+            break;
+      }  
+    }
+    
+
+    /*
     initializeDisk(&NB, &FB, &organizationMode, &interne, &allocation);
 
     if (organizationMode == 1) {
@@ -252,5 +329,6 @@ int main() {
     }
 
     free(allocation);
+    */
     return 0;
 }
