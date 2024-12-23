@@ -45,7 +45,7 @@ typedef struct MSheadCH {
 
 
 
-//*********************************************************************************************************  Create scondary memory body and head ***********************************************
+// Create scondary memory body and head ***********************************************
 MSheadCH* createMS(int* allocat, int n, int m) {
 
     // Allocate memory for the head structure
@@ -111,7 +111,7 @@ MSheadCH* createMS(int* allocat, int n, int m) {
 
 }
 
-//*********************************************************************************************************  initialise sorting modes allocation table ************************************************************** 
+// initialise sorting modes allocation table ************************************************************** 
 void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
     do {
         printf("Enter the block size factor (> 0): ");
@@ -143,7 +143,7 @@ void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
     printf("Allocation table initialized with %d cells, all set to 0.\n", *NB);
 }
 
-//***************************************************************************************************************************************************** 
+//*********************************** 
 void freeMS(MSheadCH* head,int n) {
     if (head == NULL) return;
 
@@ -167,9 +167,23 @@ void freeMS(MSheadCH* head,int n) {
     // Free head
     free(head);
 }
+int numFreeblocks(int* allocationT, int* NB){
+    int j=0  ;
+for (int i = 0; i < *NB; i++)
+{
+    if (allocationT[i]==0)
+    {
+      j++;  
+    }
+    
+}
+return j;
 
-void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* filenumber,int* FB){
-
+}
+// creat file isnt done yet
+void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* filenumber,int* FB,int* NB){
+        int k = numFreeblocks(head->alloca, NB);
+        printf("%d \n", k);//number of free blocs print just to check ida raho yemchi
         head->numberoffiles=head->numberoffiles+1;
 
         while (getchar() != '\n');// clear buffer tferegh buffer mour masste3melna scanf prs scanf y 5eli mourah \n li yreje3 fget tedi hadak character w te5roj bla mate9ra input donc like nta derte entrer fget te9ra hadik entrer li de5eltha nta mo9bil w tssoti direkte
@@ -232,6 +246,7 @@ int main() {
 // VARIABLES--
 
     FILE *MC;
+    Block Buffer;
     int NB, FB, organizationMode, interne,desition,filenumber;
     int* allocation = NULL;
     char name[50];
@@ -264,7 +279,7 @@ int main() {
             break;
         case 2:
             printf("Creating a new file...\n");
-            createfile(head,name,20, &organizationMode, &interne,&head->numberoffiles,&FB);
+            createfile(head,name,20, &organizationMode, &interne,&head->numberoffiles,&FB,&NB);
             break;
         case 3:
             printf("Renaming a file...\n");
