@@ -2,10 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------
-// Define `MSCH` first
-
+#include <math.h>
 
 typedef struct enre {
     char data;       // Data
@@ -36,9 +33,19 @@ typedef struct MSheadCH {
     int* alloca;             // Allocation array
     Meta* meta;              // Meta data array
     MSCH* body;              // MSCH body
+    int numberoffiles;
 } MSheadCH;
 
-//*********************************************************************************************************  Create Function ***********************************************
+
+
+
+
+
+
+
+
+
+//*********************************************************************************************************  Create scondary memory body and head ***********************************************
 MSheadCH* createMS(int* allocat, int n, int m) {
 
     // Allocate memory for the head structure
@@ -50,7 +57,7 @@ MSheadCH* createMS(int* allocat, int n, int m) {
 
     // Assign the allocation table and its size
     head->alloca = allocat;
-
+    head->numberoffiles=0;
     // Allocate memory for the MSCH structure (body)
     MSCH* body = (MSCH*)malloc(sizeof(MSCH));
     if (!body) {
@@ -104,7 +111,7 @@ MSheadCH* createMS(int* allocat, int n, int m) {
 
 }
 
-//************************************************************************************************************************************************************************************************************** 
+//*********************************************************************************************************  initialise sorting modes allocation table ************************************************************** 
 void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
     do {
         printf("Enter the block size factor (> 0): ");
@@ -161,12 +168,71 @@ void freeMS(MSheadCH* head,int n) {
     free(head);
 }
 
-//***************************************************************************************************************************************************** 
+void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* filenumber,int* FB){
+
+        head->numberoffiles=head->numberoffiles+1;
+
+        while (getchar() != '\n');// clear buffer tferegh buffer mour masste3melna scanf prs scanf y 5eli mourah \n li yreje3 fget tedi hadak character w te5roj bla mate9ra input donc like nta derte entrer fget te9ra hadik entrer li de5eltha nta mo9bil w tssoti direkte
+
+        printf("woul you provide the file's name : ");
+        fgets(name, 50, stdin); // scanf mais bach te9ra the hole line with space ( 3efssa te3 buffer)
+        name[strcspn(name, "\n")] = '\0';
+        puts("");
+
+        strcpy(head->meta[*filenumber].name, name); 
+        head->meta[*filenumber].filesizeBlock =(int)ceil((double)NOR / *FB);
+        head->meta[*filenumber].filesizeEnre =NOR;
+        head->meta[*filenumber].Global=*GO;
+        head->meta[*filenumber].Intern=*IO;
+
+       
+}
+
+int Renamefile (MSheadCH* head,char newname[50], int filenumber, int numoffiles){
+
+
+    if (filenumber < 0 || filenumber >= numoffiles) {
+        printf("Error: Invalid file number.\n");
+        return -1;  // Invalid file number
+    }
+        
+        printf("would you provide the new file's name :");
+        fgets(newname, 50, stdin);
+        newname[strcspn(newname, "\n")] = '\0';
+
+        puts("");// tssouti ster
+
+    for (int i = 0; i < numoffiles; i++) {
+        if (i != filenumber && strcmp(head->meta[i].name, newname) == 0) {
+            printf("Error: A file with the name '%s' already exists.\n", newname);
+            return -1;  // Duplicate name found
+        }
+    }
+
+
+strcpy(head->meta[filenumber].name, newname); //rename the file 
+printf("File has been successfully renamed to '%s'.\n", newname);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//*********************************************************************************************************  Main function
 int main() {
     FILE *MC;
     int NB, FB, organizationMode, interne;
     int* allocation = NULL;
-
+    char name[50];
+    char newname[50];
     // Initialize disk
     initializeDisk(&NB, &FB, &organizationMode, &interne, &allocation);
 
@@ -174,7 +240,8 @@ int main() {
         MSheadCH* head = createMS(allocation, NB, FB);
 
         if (head && head->alloca) {
-            printf("First value in allocation table: %d\n", head->alloca[0]);
+            createfile(head,name,20, &organizationMode, &interne,&head->numberoffiles,&FB);
+            Renamefile(head,newname,0,head->numberoffiles);
         } else {
             printf("Linked list creation failed or allocation table is empty.\n");
         }
