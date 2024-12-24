@@ -36,6 +36,11 @@ typedef struct MSheadCH {
     int numberoffiles;
 } MSheadCH;
 
+typedef struct File{
+    char name[50];
+    int id;
+};
+
 
 
 
@@ -58,6 +63,7 @@ MSheadCH* createMS(int* allocat, int n, int m) {
     // Assign the allocation table and its size
     head->alloca = allocat;
     head->numberoffiles=0;
+
     // Allocate memory for the MSCH structure (body)
     MSCH* body = (MSCH*)malloc(sizeof(MSCH));
     if (!body) {
@@ -113,6 +119,7 @@ MSheadCH* createMS(int* allocat, int n, int m) {
 
 // initialise sorting modes allocation table ************************************************************** 
 void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
+    
     do {
         printf("Enter the block size factor (> 0): ");
         scanf("%d", FB);
@@ -167,6 +174,7 @@ void freeMS(MSheadCH* head,int n) {
     // Free head
     free(head);
 }
+
 int numFreeblocks(int* allocationT, int* NB){
     int j=0  ;
 for (int i = 0; i < *NB; i++)
@@ -182,6 +190,7 @@ return j;
 }
 // creat file isnt done yet
 void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* filenumber,int* FB,int* NB){
+
         int k = numFreeblocks(head->alloca, NB);
         printf("%d \n", k);//number of free blocs print just to check ida raho yemchi
         head->numberoffiles=head->numberoffiles+1;
@@ -202,15 +211,9 @@ void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* file
        
 }
 
-int Renamefile (MSheadCH* head,char newname[50], int filenumber, int numoffiles){
-
-
-    if (filenumber < 0 || filenumber >= numoffiles) {
-        printf("Error: Invalid file number.\n");
-        return -1;  // Invalid file number
-    }
+void Renamefile (MSheadCH* head,char newname[50], int filenumber, int numoffiles){
         
-        printf("would you provide the new file's name :");
+        printf("please you provide the new file's name (no space use _ instead )   :   ");
         fgets(newname, 50, stdin);
         newname[strcspn(newname, "\n")] = '\0';
 
@@ -219,14 +222,15 @@ int Renamefile (MSheadCH* head,char newname[50], int filenumber, int numoffiles)
     for (int i = 0; i < numoffiles; i++) {
         if (i != filenumber && strcmp(head->meta[i].name, newname) == 0) {
             printf("Error: A file with the name '%s' already exists.\n", newname);
-            return -1;  // Duplicate name found
+            return ;  // Duplicate name found
         }
     }
 
 
-strcpy(head->meta[filenumber].name, newname); //rename the file 
-printf("File has been successfully renamed to '%s'.\n", newname);
-    return 0;
+    strcpy(head->meta[filenumber].name, newname); //rename the file 
+    printf("File has been successfully renamed to '%s'.\n", newname);
+    
+    return ;
 }
 
 
@@ -240,20 +244,34 @@ printf("File has been successfully renamed to '%s'.\n", newname);
 
 
 
-//*********************************************************************************************************  Main function
+//*************************************************************  Main function**********************************************
+
+
 int main() {
 
-// VARIABLES--
+// VARIABLES----------------
 
     FILE *MC;
     Block Buffer;
-    int NB, FB, organizationMode, interne,desition,filenumber;
+    int NB, FB, organizationMode, interne,TaskChoice,filenumber, numoffile;
     int* allocation = NULL;
     char name[50];
     char newname[50];
+
+    do{
+        printf("how many files do you want to store at maximum  :  ");
+        scanf("%d", &numoffile);
+    }while(numoffile > 0);
+
+    int i = 0;
+    
+    struct File Files[numoffile];
+//---------------------------
+
+    printf("\n \n \n ---------- ENTERING TERMINAL ----------------");
     while (true)
     {
-    printf("Please select an operation:\n");
+    printf("\n \nPlease select an operation   :\n");
     printf("1 - Initialize system\n");
     printf("2 - Create a new file\n");
     printf("3 - Rename a file\n");
@@ -266,11 +284,11 @@ int main() {
     printf("10 - Save file to disk\n");
     printf("11 - Delete a file\n");
     printf("12 - Clear memory structure\n");
-    printf("13 - Exit\n");
+    printf("13 - Exit\n \n \n ");
 
-    scanf("%d", &desition);
+    scanf("%d", &TaskChoice);
 
-      switch (desition)
+      switch (TaskChoice)
       {
       case 1:
             printf("Initializing system...\n");
@@ -284,8 +302,12 @@ int main() {
         case 3:
             printf("Renaming a file...\n");
             printf("please enter the file number that you want to rename");
-            scanf("%d", &filenumber);
-            Renamefile(head,newname,filenumber,head->numberoffiles);
+            do{
+                scanf("%d", &filenumber);
+                Renamefile(head,newname,filenumber,head->numberoffiles);
+
+            }while(filenumber >=0 && filenumber <= numoffile);
+            
             break;
         case 4:
             printf("Adding a record...\n");
@@ -347,3 +369,14 @@ int main() {
     */
     return 0;
 }
+
+
+
+
+/*-------------------------------------- FAHD PART ---------------------------------------------------*/
+
+
+
+
+
+/*----------------------------------------------------------------------------------------------------*/
