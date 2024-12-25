@@ -5,23 +5,23 @@
 #include <math.h>
 #include "../include/raylib.h"
 
-typedef struct Record {
+typedef struct Record { //--------- Record structure---------//
     char data;       // Data
     int id;          // Bloc ID
     bool deleted;    // Logical deletion
 } Record;
 
-typedef struct Bloc {
+typedef struct Bloc { // -------------Bloc structure------//
     int id;          // Bloc ID
     Record* Data;   // Dynamic array of `Record`
     int next;        // Next Bloc ID or -1 if last Bloc
 } Bloc;
 
-typedef struct Ms {
+typedef struct Ms { // Main structure
     struct Bloc* Bloc;   // Dynamic array of Blocs
 } Ms;
 
-typedef struct Meta {
+typedef struct Meta { // Meta data structure
     char name[50];           // File name
     int filesizeBloc;       // File size in Blocs
     int filesizeRecord;        // File size in Data
@@ -45,16 +45,8 @@ typedef struct File{
 };
 
 
-
-
-
-
-
-
-
-
 // Create scondary memory body and head ***********************************************
-MsHead* createMS(int* allocat, int n, int m) {
+MsHead* createMS(int* allocat, int n, int FB) {
 
     FILE *MS;
     MS =fopen("memoryS.data", "wt+");
@@ -96,7 +88,7 @@ MsHead* createMS(int* allocat, int n, int m) {
         Blocs[i].next = -1;    // No next Bloc by default
 
         // Allocate memory for Data in the Bloc
-        Blocs[i].Data = (Record*)malloc(m * sizeof(Record));
+        Blocs[i].Data = (Record*)malloc(FB * sizeof(Record));
         if (!Blocs[i].Data) {
             printf("Memory allocation failed for Data in Bloc %d\n", i + 1);
             for (int j = 0; j < i; j++) { // Free previous Blocs
@@ -109,7 +101,7 @@ MsHead* createMS(int* allocat, int n, int m) {
         }
 
         // Initialize Data in the Bloc
-        for (int j = 0; j < m; j++) {
+        for (int j = 0; j < FB; j++) {
             Blocs[i].Data[j].id = j ; // Assign entry IDs
             Blocs[i].Data[j].data = '\0';    // No data initially
         }
@@ -124,7 +116,7 @@ MsHead* createMS(int* allocat, int n, int m) {
     // Link the body to the head
     head->body = thebody;
 
-    printf("MS structure created with %d Blocs, each containing %d Data.\n", n, m);
+    printf("MS structure created with %d Blocs, each containing %d Data.\n", n, FB);
     return head;
 
 }
@@ -278,10 +270,6 @@ void Renamefile (MsHead* head,char newname[50], int filenumber, int numoffiles){
 
 
 
-
-
-
-
 /*-------------------------------------- MOZALI PART -------------------------------------------------*/
 
 void insertRecord(MsHead* head, int filenumber, char data, int* FB) {
@@ -321,8 +309,7 @@ void insertRecord(MsHead* head, int filenumber, char data, int* FB) {
 
 
 
-/*----------------------------------------------------------------------------------------------------*/
-
+/*--------------------------------------------------------------------------------------------------*/
 
 
 
