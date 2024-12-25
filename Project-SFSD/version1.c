@@ -295,44 +295,60 @@ void insertRecord(MsHead* head, int filenumber, char data, int* FB) {
 
 
 
-/*-------------------------------------- MAHDI PART --------------------------------------------------*/
+/*-------------------------------------- Mehdi's Part --------------------------------------------------*/
 
-void DeleteFile (char name[50], int numoffile, MsHead* head){
+void DeleteFile(char name[50], int numoffile, MsHead* head){
 
-    if (head == NULL || head->meta == NULL) {
+    if (head == NULL || head->meta == NULL) {        //head ou head->meta ne sont pas allouée donc il ne peut pas y'avoir de fichier
 
         printf("Error, invalid metadata structure.\n");
 
         return;
 
     }
+    
 
     for (int i = 0; i < numoffile ; i++){
 
         if (strcmp(head->meta[i].name, name) == 0){
 
-            for (int j = i; j < numoffile-1; j++){
+            if(numoffile == 1){       // Si ily'a qu'un seul élément libérer la mémoire allouée 
 
-                head->meta[j]=head->meta[j+1];
+                free(head->meta);
 
-            }
+                head->meta = NULL;      //NULL proposition ta3 chatgpt bech tiviti les pointeur "dangereux"
 
-            numoffile--;
+            }else{
 
-            printf("The file '%s' has been deleted.", name);
+                for (int j = i; j < numoffile-1; j++){    //Ecraser le fichier qu'on veut supprimer et decaler les autres fichiers
 
-            return ;
+                    head->meta[j]=head->meta[j+1];
+
+                }
+
+                numoffile--;     //Le nombre de fichier diminue de 1
+
+                printf("The file '%s' has been deleted.", name);
+
+                return ;
+
+            }    
             
         }
         
     
     }
 
-    printf("The file '%s' doesn't exist.", name);
+    printf("The file '%s' doesn't exist.", name);      //Si le fichier n'existe pas
 
     return ;
 
 }
+
+
+
+
+
 
 /*----------------------------------------------------------------------------------------------------*/
 
