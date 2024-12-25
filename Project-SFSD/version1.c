@@ -175,19 +175,34 @@ void freeMS(MSheadCH* head,int n) {
     free(head);
 }
 
-int numFreeblocks(int* allocationT, int* NB){
-    int j=0  ;
-for (int i = 0; i < *NB; i++)
-{
-    if (allocationT[i]==0)
-    {
-      j++;  
-    }
-    
-}
-return j;
+int* numFreeblocks(int* allocationT, int* NB){
 
+    int j=0  ;
+    for (int i = 0; i < *NB; i++)
+    {
+        if (allocationT[i]==0)
+        {
+        j++;  
+        }
+        
+    }
+
+    int* freeblocs = (int*)malloc(j * sizeof(int));
+
+    int k = 0;
+
+    for (int i = 0; i < *NB; i++){
+        if (allocationT[i]==0){
+
+            freeblocs[k] = i;
+            k++;
+        }
+        
+    }
+
+    return freeblocs;
 }
+
 // creat file isnt done yet
 void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* filenumber,int* FB,int* NB){
 
@@ -236,10 +251,42 @@ void Renamefile (MSheadCH* head,char newname[50], int filenumber, int numoffiles
 
 
 
+/*-------------------------------------- FAHD PART ---------------------------------------------------*/
 
 
 
 
+
+/*----------------------------------------------------------------------------------------------------*/
+
+
+/*-------------------------------------- MOZALI PART -------------------------------------------------*/
+
+
+
+
+
+/*----------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+/*-------------------------------------- MAHDI PART --------------------------------------------------*/
+
+
+
+/*----------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+/*-------------------------------------- STAMBOULI PART ----------------------------------------------*/
+
+
+
+/*----------------------------------------------------------------------------------------------------*/
 
 
 
@@ -251,7 +298,8 @@ int main() {
 
 // VARIABLES----------------
 
-    FILE *MC;
+    FILE *MS; MS = fopen("MemoryS.data","rt+");
+
     Block Buffer;
     int NB, FB, organizationMode, interne,TaskChoice,filenumber, numoffile;
     int* allocation = NULL;
@@ -364,5 +412,6 @@ int main() {
 
     free(allocation);
     */
+   
     return 0;
 }
