@@ -252,42 +252,7 @@ void Renamefile (MsHead* head,char newname[50], int filenumber, int numoffiles){
     return ;
 }
 
-void DeleteFile (char name[50], int numoffile, MSheadCH* head){
 
-    if (head == NULL || head->meta == NULL) {
-
-        printf("Error, invalid metadata structure.\n");
-
-        return;
-
-    }
-
-    for (int i = 0; i < numoffile ; i++){
-
-        if (strcmp(head->meta[i].name, name) == 0){
-
-            for (int j = i; j < numoffile-1; j++){
-
-                head->meta[j]=head->meta[j+1];
-
-            }
-
-            numoffile--;
-
-            printf("The file '%s' has been deleted.", name);
-
-            return ;
-            
-        }
-        
-    
-    }
-
-    printf("The file '%s' doesn't exist.", name);
-
-    return ;
-
-}
 
 
 /*-------------------------------------- FAHD PART ---------------------------------------------------*/
@@ -332,7 +297,42 @@ void insertRecord(MsHead* head, int filenumber, char data, int* FB) {
 
 /*-------------------------------------- MAHDI PART --------------------------------------------------*/
 
+void DeleteFile (char name[50], int numoffile, MsHead* head){
 
+    if (head == NULL || head->meta == NULL) {
+
+        printf("Error, invalid metadata structure.\n");
+
+        return;
+
+    }
+
+    for (int i = 0; i < numoffile ; i++){
+
+        if (strcmp(head->meta[i].name, name) == 0){
+
+            for (int j = i; j < numoffile-1; j++){
+
+                head->meta[j]=head->meta[j+1];
+
+            }
+
+            numoffile--;
+
+            printf("The file '%s' has been deleted.", name);
+
+            return ;
+            
+        }
+        
+    
+    }
+
+    printf("The file '%s' doesn't exist.", name);
+
+    return ;
+
+}
 
 /*----------------------------------------------------------------------------------------------------*/
 
