@@ -260,9 +260,31 @@ void Renamefile (MSheadCH* head,char newname[50], int filenumber, int numoffiles
 /*----------------------------------------------------------------------------------------------------*/
 
 
+
+
+
+
+
+
+
+
+
+
 /*-------------------------------------- MOZALI PART -------------------------------------------------*/
 
-
+/*void insertRecord(MSheadCH* head, int filenumber, char data, int* FB) {
+    for (int i = 0; i < head->meta[filenumber].filesizeBlock; i++) {
+        for (int j = 0; j < *FB; j++) {
+            if (head->body->block[i].entries[j].data == '\0') {
+                head->body->block[i].entries[j].data = data;
+                head->body->block[i].entries[j].deleted = false;
+                printf("Record inserted successfully.\n");
+                return;
+            }
+        }
+    }
+   /* printf("No space available to insert the record.\n");
+}
 
 
 
