@@ -5,37 +5,39 @@
 #include <math.h>
 #include "../include/raylib.h"
 
-typedef struct enre {
+typedef struct Record { //--------- Record structure---------//
     char data;       // Data
-    int id;          // Block ID
+    int id;          // Bloc ID
     bool deleted;    // Logical deletion
-} enre;
+} Record;
 
-typedef struct Block {
-    int id;          // Block ID
-    enre* entries;   // Dynamic array of `enre`
-    int next;        // Next block ID or -1 if last block
-} Block;
+typedef struct Bloc { // -------------Bloc structure------//
+    int id;          // Bloc ID
+    Record* Data;   // Dynamic array of `Record`
+    int next;        // Next Bloc ID or -1 if last Bloc
+} Bloc;
 
-typedef struct MSCH {
-    struct Block* block;   // Dynamic array of blocks
-} MSCH;
+typedef struct Ms { // Main structure
+    struct Bloc* Bloc;   // Dynamic array of Blocs
+} Ms;
 
-typedef struct Meta {
+typedef struct Meta { // Meta data structure
     char name[50];           // File name
-    int filesizeBlock;       // File size in blocks
-    int filesizeEnre;        // File size in entries
-    int firstblockaddress;   // Address of the first block
+    int filesizeBloc;       // File size in Blocs
+    int filesizeRecord;        // File size in Data
+    int firstBlocaddress;   // Address of the first Bloc
     bool Global;             // Organization mode (1 = chained, 0 = contiguous)
-    bool Intern;             // Sorted entries (1 = sorted, 0 = unsorted)
+    bool Intern;             // Sorted Data (1 = sorted, 0 = unsorted)
 } Meta;
 
-typedef struct MSheadCH {
+typedef struct MsHead {
     int* alloca;             // Allocation array
     Meta* meta;              // Meta data array
-    MSCH *body;              // MSCH body
     int numberoffiles;
-} MSheadCH;
+    
+    Ms *body;              // Ms body
+
+} MsHead;
 
 typedef struct File{
     char name[50];
@@ -43,19 +45,17 @@ typedef struct File{
 };
 
 
-
-
-
-
-
-
-
-
 // Create scondary memory body and head ***********************************************
-MSheadCH* createMS(int* allocat, int n, int m) {
+MsHead* createMS(int* allocat, int n, int FB) {
+
+    FILE *MS;
+    MS =fopen("memoryS.data", "wt+");
+
+    FILE *HEAD;
+    HEAD = fopen("HEAD.data", "wt+");
 
     // Allocate memory for the head structure
-    MSheadCH* head = (MSheadCH*)malloc(sizeof(MSheadCH));
+    MsHead* head = (MsHead*)malloc(sizeof(MsHead));
     if (!head) {
         printf("Memory allocation failed for head\n");
         exit(1);
@@ -64,55 +64,59 @@ MSheadCH* createMS(int* allocat, int n, int m) {
     // Assign the allocation table and its size
     head->alloca = allocat;
     head->numberoffiles=0;
-    // Allocate memory for the MSCH structure (body)
-    MSCH* thebody = (MSCH*)malloc(sizeof(MSCH));
+
+    // Allocate memory for the Ms structure (body)
+    Ms* thebody = (Ms*)malloc(sizeof(Ms));
     if (!thebody) {
         printf("Memory allocation failed for body\n");
         free(head);
         exit(1);
     }
 
-    // Allocate memory for the blocks array
-    Block* blocks = (Block*)malloc(n * sizeof(Block));
-    if (!blocks) {
-        printf("Memory allocation failed for blocks\n");
+    // Allocate memory for the Blocs array
+    Bloc* Blocs = (Bloc*)malloc(n * sizeof(Bloc));
+    if (!Blocs) {
+        printf("Memory allocation failed for Blocs\n");
         free(thebody);
         free(head);
         exit(1);
     }
 
-    // Initialize each block
+    // Initialize each Bloc
     for (int i = 0; i < n; i++) {
-        blocks[i].id = i + 1;   // Assign block IDs
-        blocks[i].next = -1;    // No next block by default
+        Blocs[i].id = i ;   // Assign Bloc IDs
+        Blocs[i].next = -1;    // No next Bloc by default
 
-        // Allocate memory for entries in the block
-        blocks[i].entries = (enre*)malloc(m * sizeof(enre));
-        if (!blocks[i].entries) {
-            printf("Memory allocation failed for entries in block %d\n", i + 1);
-            for (int j = 0; j < i; j++) { // Free previous blocks
-                free(blocks[j].entries);
+        // Allocate memory for Data in the Bloc
+        Blocs[i].Data = (Record*)malloc(FB * sizeof(Record));
+        if (!Blocs[i].Data) {
+            printf("Memory allocation failed for Data in Bloc %d\n", i + 1);
+            for (int j = 0; j < i; j++) { // Free previous Blocs
+                free(Blocs[j].Data);
             }
-            free(blocks);
+            free(Blocs);
             free(thebody);
             free(head);
             exit(1);
         }
 
-        // Initialize entries in the block
-        for (int j = 0; j < m; j++) {
-            blocks[i].entries[j].id = j + 1; // Assign entry IDs
-            blocks[i].entries[j].data = '\0';    // No data initially
+        // Initialize Data in the Bloc
+        for (int j = 0; j < FB; j++) {
+            Blocs[i].Data[j].id = j ; // Assign entry IDs
+            Blocs[i].Data[j].data = '\0';    // No data initially
         }
+
+        fwrite(&Blocs, sizeof(Blocs), 1, MS);
+        
     }
 
-    // Assign blocks to the body
-    thebody->block = blocks;
+    // Assign Blocs to the body
+    thebody->Bloc = Blocs;
 
     // Link the body to the head
     head->body = thebody;
 
-    printf("MS structure created with %d blocks, each containing %d entries.\n", n, m);
+    printf("MS structure created with %d Blocs, each containing %d Data.\n", n, FB);
     return head;
 
 }
@@ -121,12 +125,12 @@ MSheadCH* createMS(int* allocat, int n, int m) {
 void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
     
     do {
-        printf("Enter the block size factor (> 0): ");
+        printf("Enter the Bloc size factor (> 0): ");
         scanf("%d", FB);
     } while (*FB <= 0);
 
     do {
-        printf("Enter the total number of blocks (> 0): ");
+        printf("Enter the total number of Blocs (> 0): ");
         scanf("%d", NB);
     } while (*NB <= 0);
 
@@ -151,7 +155,7 @@ void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
 }
 
 //*********************************** 
-void freeMS(MSheadCH* head,int n) {
+void freeMS(MsHead* head,int n) {
     if (head == NULL) return;
 
     // Free allocation table
@@ -160,13 +164,13 @@ void freeMS(MSheadCH* head,int n) {
     // Free metadata
     free(head->meta);
 
-    // Free blocks
+    // Free Blocs
     if (head->body != NULL) {
-        if (head->body->block != NULL) {
+        if (head->body->Bloc != NULL) {
             for (int i = 0; i < n; i++) {
-                free(head->body->block[i].entries);
+                free(head->body->Bloc[i].Data);
             }
-            free(head->body->block);
+            free(head->body->Bloc);
         }
         free(head->body);
     }
@@ -175,23 +179,38 @@ void freeMS(MSheadCH* head,int n) {
     free(head);
 }
 
-int numFreeblocks(int* allocationT, int* NB){
+int* numFreeBlocs(int* allocationT, int* NB){
+
     int j=0  ;
-for (int i = 0; i < *NB; i++)
-{
-    if (allocationT[i]==0)
+    for (int i = 0; i < *NB; i++)
     {
-      j++;  
+        if (allocationT[i]==0)
+        {
+        j++;  
+        }
+        
     }
-    
-}
-return j;
 
+    int* freeblocs = (int*)malloc(j * sizeof(int));
+
+    int k = 0;
+
+    for (int i = 0; i < *NB; i++){
+        if (allocationT[i]==0){
+
+            freeblocs[k] = i;
+            k++;
+        }
+        
+    }
+
+    return freeblocs;
 }
+
 // creat file isnt done yet
-void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* filenumber,int* FB,int* NB){
+void createfile(MsHead* head,char name[50],int NOR ,int* GO, int* IO,int* filenumber,int* FB,int* NB){
 
-        int k = numFreeblocks(head->alloca, NB);
+        int k = numFreeBlocs(head->alloca, NB);
         printf("%d \n", k);//number of free blocs print just to check ida raho yemchi
         head->numberoffiles=head->numberoffiles+1;
 
@@ -203,15 +222,15 @@ void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* file
         puts("");
 
         strcpy(head->meta[*filenumber].name, name); 
-        head->meta[*filenumber].filesizeBlock =(int)ceil((double)NOR / *FB);    // [NOR / FB ]+1
-        head->meta[*filenumber].filesizeEnre =NOR;
+        head->meta[*filenumber].filesizeBloc =(int)ceil((double)NOR / *FB);    // [NOR / FB ]+1
+        head->meta[*filenumber].filesizeRecord =NOR;
         head->meta[*filenumber].Global=*GO;
         head->meta[*filenumber].Intern=*IO;
 
        
 }
 
-void Renamefile (MSheadCH* head,char newname[50], int filenumber, int numoffiles){
+void Renamefile (MsHead* head,char newname[50], int filenumber, int numoffiles){
         
         printf("please you provide the new file's name (no space use _ instead )   :   ");
         fgets(newname, 50, stdin);
@@ -271,11 +290,61 @@ void DeleteFile (char name[50], int numoffile, MSheadCH* head){
 }
 
 
+/*-------------------------------------- FAHD PART ---------------------------------------------------*/
 
 
 
 
 
+/*----------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+
+
+
+/*-------------------------------------- MOZALI PART -------------------------------------------------*/
+
+void insertRecord(MsHead* head, int filenumber, char data, int* FB) {
+
+    for (int i = 0; i < head->meta[filenumber].filesizeBloc; i++) {
+        for (int j = 0; j < *FB; j++) {
+            if (head->body->Bloc[i].Data[j].data == '\0') {
+                head->body->Bloc[i].Data[j].data = data;
+                head->body->Bloc[i].Data[j].deleted = false;
+                printf("Record inserted successfully.\n");
+                return;
+            }
+        }
+    }
+   printf("No space available to insert the record.\n");
+}
+
+
+
+/*----------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+/*-------------------------------------- MAHDI PART --------------------------------------------------*/
+
+
+
+/*----------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+/*-------------------------------------- STAMBOULI PART ----------------------------------------------*/
+
+
+
+/*--------------------------------------------------------------------------------------------------*/
 
 
 
@@ -286,8 +355,9 @@ int main() {
 
 // VARIABLES----------------
 
-    FILE *MC;
-    Block Buffer;
+    FILE *MS; MS = fopen("MemoryS.data","rt+");
+
+    Bloc Buffer;
     int NB, FB, organizationMode, interne,TaskChoice,filenumber, numoffile;
     int* allocation = NULL;
     char name[50];
@@ -328,7 +398,7 @@ int main() {
         case 1:
             printf("Initializing system...\n");
             initializeDisk(&NB, &FB, &organizationMode, &interne, &allocation);
-            MSheadCH* head = createMS(allocation, NB, FB);
+            MsHead* head = createMS(allocation, NB, FB);
             break;
         case 2:
         
@@ -388,7 +458,7 @@ int main() {
     initializeDisk(&NB, &FB, &organizationMode, &interne, &allocation);
 
     if (organizationMode == 1) {
-        MSheadCH* head = createMS(allocation, NB, FB);
+        MsHead* head = createMS(allocation, NB, FB);
 
         if (head && head->alloca) {
             createfile(head,name,20, &organizationMode, &interne,&head->numberoffiles,&FB);
@@ -404,5 +474,6 @@ int main() {
 
     free(allocation);
     */
+   
     return 0;
 }
