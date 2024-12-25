@@ -5,7 +5,6 @@
 #include <math.h>
 #include "../include/raylib.h"
 
-
 typedef struct enre {
     char data;       // Data
     int id;          // Block ID
