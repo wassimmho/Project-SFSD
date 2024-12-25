@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
+#include "../include/raylib.h"
+
 
 typedef struct enre {
     char data;       // Data
@@ -32,7 +34,7 @@ typedef struct Meta {
 typedef struct MSheadCH {
     int* alloca;             // Allocation array
     Meta* meta;              // Meta data array
-    MSCH* body;              // MSCH body
+    MSCH *body;              // MSCH body
     int numberoffiles;
 } MSheadCH;
 
@@ -57,10 +59,10 @@ MSheadCH* createMS(int* allocat, int n, int m) {
 
     // Assign the allocation table and its size
     head->alloca = allocat;
-    head->numberoffiles=0;
+    head->numberoffiles = 0;
     // Allocate memory for the MSCH structure (body)
-    MSCH* body = (MSCH*)malloc(sizeof(MSCH));
-    if (!body) {
+    MSCH* thebody = (MSCH*)malloc(sizeof(MSCH));
+    if (!thebody) {
         printf("Memory allocation failed for body\n");
         free(head);
         exit(1);
@@ -70,7 +72,7 @@ MSheadCH* createMS(int* allocat, int n, int m) {
     Block* blocks = (Block*)malloc(n * sizeof(Block));
     if (!blocks) {
         printf("Memory allocation failed for blocks\n");
-        free(body);
+        free(thebody);
         free(head);
         exit(1);
     }
@@ -88,7 +90,7 @@ MSheadCH* createMS(int* allocat, int n, int m) {
                 free(blocks[j].entries);
             }
             free(blocks);
-            free(body);
+            free(thebody);
             free(head);
             exit(1);
         }
@@ -101,10 +103,10 @@ MSheadCH* createMS(int* allocat, int n, int m) {
     }
 
     // Assign blocks to the body
-    body->block = blocks;
+    thebody->block = blocks;
 
     // Link the body to the head
-    head->body = body;
+    head->body = thebody;
 
     printf("MS structure created with %d blocks, each containing %d entries.\n", n, m);
     return head;
@@ -194,7 +196,7 @@ void createfile(MSheadCH* head,char name[50],int NOR ,int* GO, int* IO,int* file
         puts("");
 
         strcpy(head->meta[*filenumber].name, name); 
-        head->meta[*filenumber].filesizeBlock =(int)ceil((double)NOR / *FB);
+        head->meta[*filenumber].filesizeBlock =(int)ceil((double)NOR / *FB);    // [NOR / FB ]+1
         head->meta[*filenumber].filesizeEnre =NOR;
         head->meta[*filenumber].Global=*GO;
         head->meta[*filenumber].Intern=*IO;
@@ -272,19 +274,20 @@ int main() {
 
       switch (desition)
       {
-      case 1:
+        case 1:
             printf("Initializing system...\n");
             initializeDisk(&NB, &FB, &organizationMode, &interne, &allocation);
             MSheadCH* head = createMS(allocation, NB, FB);
             break;
         case 2:
+        
             printf("Creating a new file...\n");
             createfile(head,name,20, &organizationMode, &interne,&head->numberoffiles,&FB,&NB);
             break;
         case 3:
             printf("Renaming a file...\n");
-            printf("please enter the file number that you want to rename");
-            scanf("%d", &filenumber);
+            //printf("please enter the file number that you want to rename");
+            //scanf("%d", &filenumber);
             Renamefile(head,newname,filenumber,head->numberoffiles);
             break;
         case 4:
@@ -347,3 +350,10 @@ int main() {
     */
     return 0;
 }
+
+
+
+
+
+
+
