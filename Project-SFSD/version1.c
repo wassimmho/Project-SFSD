@@ -233,7 +233,42 @@ void Renamefile (MSheadCH* head,char newname[50], int filenumber, int numoffiles
     return ;
 }
 
+void DeleteFile (char name[50], int numoffile, MSheadCH* head){
 
+    if (head == NULL || head->meta == NULL) {
+
+        printf("Error, invalid metadata structure.\n");
+
+        return;
+
+    }
+
+    for (int i = 0; i < numoffile ; i++){
+
+        if (strcmp(head->meta[i].name, name) == 0){
+
+            for (int j = i; j < numoffile-1; j++){
+
+                head->meta[j]=head->meta[j+1];
+
+            }
+
+            numoffile--;
+
+            printf("The file '%s' has been deleted.", name);
+
+            return ;
+            
+        }
+        
+    
+    }
+
+    printf("The file '%s' doesn't exist.", name);
+
+    return ;
+
+}
 
 
 
@@ -328,7 +363,12 @@ int main() {
             printf("Saving file to disk...\n");
             break;
         case 11:
+            printf("Please enter the name of the file you want to delete :\n");
+            fgets(name, 50, stdin);
+            name[strcspn(name, "\n")] = '\0';
+            puts("");
             printf("Deleting a file...\n");
+            DeleteFile(name, numoffile, head);
             break;
         case 12:
             printf("Clearing memory structure...\n");
