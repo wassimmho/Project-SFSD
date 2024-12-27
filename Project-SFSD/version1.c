@@ -22,7 +22,7 @@ typedef struct Ms { // Main structure
     struct Bloc* Bloc;   // Dynamic array of Blocs
 } Ms;
 
-typedef struct Meta { // Meta data structure
+typedef struct Meta { // Meta data structure fih les informations li 3andna 3la les fichiers
     char name[50];           // File name
     int filesizeBloc;       // File size in Blocs
     int filesizeRecord;        // File size in Data
@@ -31,12 +31,11 @@ typedef struct Meta { // Meta data structure
     bool Intern;             // Sorted Data (1 = sorted, 0 = unsorted)
 } Meta;
 
-typedef struct MsHead {
+typedef struct MsHead { // Head block structure
     int* alloca;             // Allocation array
     Meta* meta;              // Meta data array
-    int numberoffiles;
-    
-    Ms *body;              // Ms body
+    int numberoffiles;       // Number of files
+    Ms *body;              // Ms body fih les blocs
 
 } MsHead;
 
@@ -46,17 +45,17 @@ typedef struct File{
 };
 
 
-// Create scondary memory body and head ***********************************************
-MsHead* createMS(int* allocat, int n, int FB) {
+// ************************Create scondary memory body and head ***********************************************
+MsHead* createMS(int* allocat, int n, int FB,int numoffile) {//n is the number of blocs and FB is the number of records in each bloc
 
     FILE *MS;
-    MS =fopen("memoryS.data", "wt+");
+    MS =fopen("memoryS.txt", "wt+");
 
     FILE *HEAD;
-    HEAD = fopen("HEAD.data", "wt+");
+    HEAD = fopen("HEAD.txt", "wt+");
 
     // Allocate memory for the head structure
-    MsHead* head = (MsHead*)malloc(sizeof(MsHead));
+    MsHead* head = (MsHead*)malloc(sizeof(MsHead)); // Allocate memory for the head structure
     if (!head) {
         printf("Memory allocation failed for head\n");
         exit(1);
@@ -82,6 +81,16 @@ MsHead* createMS(int* allocat, int n, int FB) {
         free(head);
         exit(1);
     }
+      // Allocate memory for the meta array
+    head->meta = (Meta*)malloc( n * sizeof(Meta)); // hadi rani zdtha wassim chofha 
+    if (!head->meta) {
+        printf("Memory allocation failed for meta\n");
+        free(Blocs);
+        free(thebody);
+        free(head);
+        exit(1);
+    }
+
 
     // Initialize each Bloc
     for (int i = 0; i < n; i++) {
@@ -102,20 +111,20 @@ MsHead* createMS(int* allocat, int n, int FB) {
         }
 
         // Initialize Data in the Bloc
-        for (int j = 0; j < FB; j++) {
+        for (int j = 0; j < FB; j++) {//
             Blocs[i].Data[j].id = j ; // Assign entry IDs
             Blocs[i].Data[j].data = '\0';    // No data initially
         }
 
-        fwrite(&Blocs, sizeof(Blocs), 1, MS);
+        fwrite(&Blocs, sizeof(Blocs), 1, MS);//write the blocs in the file
         
     }
 
     // Assign Blocs to the body
-    thebody->Bloc = Blocs;
+    thebody->Bloc = Blocs;//assign the blocs to the body
 
     // Link the body to the head
-    head->body = thebody;
+    head->body = thebody;//assign the body to the head
 
     printf("MS structure created with %d Blocs, each containing %d Data.\n", n, FB);
     return head;
@@ -123,11 +132,11 @@ MsHead* createMS(int* allocat, int n, int FB) {
 }
 
 // initialise sorting modes allocation table ************************************************************** 
-void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
+void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {//NB is the number of blocs, FB is the number of records in each bloc, Orga is the organization mode, inter is the sorting mode and vector is the allocation table
     
     do {
         printf("Enter the Bloc size factor (> 0): ");
-        scanf("%d", FB);
+        scanf("%d", FB);//scan the bloc size factor
     } while (*FB <= 0);
 
     do {
@@ -145,13 +154,13 @@ void initializeDisk(int* NB, int* FB, int* Orga, int* inter, int** vector) {
         scanf("%d", inter);
     } while (*inter != 0 && *inter != 1);
 
-    *vector = (int*)malloc(*NB * sizeof(int));
+    *vector = (int*)malloc(*NB * sizeof(int)); // Allocate memory for the allocation table
     if (!*vector) {
         printf("Memory allocation failed\n");
         exit(1);
     }
 
-    memset(*vector, 0, *NB * sizeof(int));
+    memset(*vector, 0, *NB * sizeof(int));//initialize all element in the allocation table with 0
     printf("Allocation table initialized with %d cells, all set to 0.\n", *NB);
 }
 
@@ -273,11 +282,12 @@ void Renamefile (MsHead* head,char newname[50], int filenumber, int numoffiles){
 
 /*-------------------------------------- MOZALI PART -------------------------------------------------*/
 
-void insertRecord(MsHead* head, int filenumber, char data, int* FB) {
+void insertRecord(MsHead* head, int filenumber, char data, int* FB) {//insert record in the file 
 
     for (int i = 0; i < head->meta[filenumber].filesizeBloc; i++) {
         for (int j = 0; j < *FB; j++) {
             if (head->body->Bloc[i].Data[j].data == '\0') {
+                head->body->Bloc[i].Data[j].id = j;
                 head->body->Bloc[i].Data[j].data = data;
                 head->body->Bloc[i].Data[j].deleted = false;
                 printf("Record inserted successfully.\n");
@@ -288,6 +298,55 @@ void insertRecord(MsHead* head, int filenumber, char data, int* FB) {
    printf("No space available to insert the record.\n");
 }
 
+
+
+// Function to search for a record by ID
+void searchRecord(MsHead* head, int filenumber, int recordID, int* FB) {//search for a record by ID in the file
+    if (filenumber >= head->numberoffiles) {//if the file number is invalid
+        printf("Invalid file number.\n");
+        return;
+    }
+
+    for (int i = 0; i < head->meta[filenumber].filesizeBloc; i++) {//get the blocs of the file we want to search in
+        Bloc currentBloc = head->body->Bloc[i];//get the current bloc
+        for (int j = 0; j < *FB; j++) {
+            Record currentRecord = currentBloc.Data[j];//get the current record in the bloc
+            if (currentRecord.id == recordID) {//if the record id is the same as the one we are searching for
+                if (!currentRecord.deleted) {//if the record is not logically deleted
+                    printf("Record found in block %d, entry %d.\n", i + 1, j + 1);
+                    return;
+                } else {
+                    printf("Record with ID %d is logically deleted.\n", recordID);//if the record is logically deleted
+                    return;
+                }
+            }
+        }
+    }
+    printf("Record with ID %d not found.\n", recordID);
+}
+// Function to logically delete a record
+void deleteRecord(MsHead* head, int filenumber, int recordID, int* FB) {
+    if (filenumber >= head->numberoffiles) {//if the file number is invalid
+        printf("Invalid file number.\n");
+        return;
+    }
+
+    for (int i = 0; i < head->meta[filenumber].filesizeBloc; i++) {//get the blocs of the file we want to search in
+        for (int j = 0; j < *FB; j++) {//search for the record in the bloc
+            if (head->body->Bloc[i].Data[j].id == recordID) {//if the record id is the same as the one we are searching for
+                if (!head->body->Bloc[i].Data[j].deleted) {
+                    head->body->Bloc[i].Data[j].deleted = true;//logically delete the record
+                    printf("Record with ID %d logically deleted.\n", recordID);//
+                    return;
+                } else {
+                    printf("Record with ID %d is already logically deleted.\n", recordID);
+                    return;
+                }
+            }
+        }
+    }
+    printf("Record with ID %d not found.\n", recordID);
+}
 
 
 /*----------------------------------------------------------------------------------------------------*/
@@ -429,15 +488,17 @@ int main() {
     FILE *MS; MS = fopen("MemoryS.data","rt+");
 
     Bloc Buffer;
-    int NB, FB, organizationMode, interne,TaskChoice,filenumber, numoffile, numofrecord;
+    int NB, FB, organizationMode, interne,TaskChoice,filenumber, numoffile, numofrecord, IdOfFile;
     int* allocation = NULL;
     char name[50];
     char newname[50];
+    MsHead* head = NULL;//head of the memory structure creato hna bch nkhdmo bih f ga3 le main
 
     do{
         printf("how many files do you want to store at maximum  :  ");
         scanf("%d", &numoffile);
-    }while(numoffile > 0);
+        while (getchar() != '\n'); // Clear the input buffer
+    }while(numoffile <= 0);
 
     int i = 0;
     
@@ -465,12 +526,13 @@ int main() {
 
     scanf("%d", &TaskChoice);
 
+
       switch (TaskChoice)
       {
         case 1:
             printf("Initializing system...\n");
             initializeDisk(&NB, &FB, &organizationMode, &interne, &allocation);
-            MsHead* head = createMS(allocation, NB, FB);
+            head = createMS(allocation, NB, FB , numoffile);
             break;
         case 2:
             printf("Creating a new file...\n");
@@ -490,12 +552,27 @@ int main() {
             break;
         case 5:
             printf("Adding a record...\n");
+            printf("please enter the file number that you want to add a record");
+            scanf("%d", &filenumber);
+            printf("please enter the record data");
+            scanf("%c", &Buffer.Data[0].data);
+            insertRecord(head,filenumber,Buffer.Data[0].data,&FB);
             break;
         case 6:
             printf("Searching for record by ID...\n");
+            printf("please enter the file number that you want to search a record: ");
+            scanf("%d", &filenumber);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            searchRecord(head, filenumber, IdOfFile, &FB);
             break;
         case 7:
             printf("Logically deleting a record...\n");
+            printf("please enter the file number that you want to delete a record: ");
+            scanf("%d", &filenumber);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            deleteRecord(head, filenumber, IdOfFile, &FB);
             break;
         case 8:
             printf("Physically deleting a record...\n");
