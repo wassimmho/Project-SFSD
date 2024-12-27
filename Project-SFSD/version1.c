@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 #include "../include/raylib.h"
 
 typedef struct Record { //--------- Record structure---------//
@@ -216,7 +217,7 @@ void createfile(MsHead* head,char name[50],int NOR ,int* GO, int* IO,int* filenu
 
         while (getchar() != '\n');// clear buffer tferegh buffer mour masste3melna scanf prs scanf y 5eli mourah \n li yreje3 fget tedi hadak character w te5roj bla mate9ra input donc like nta derte entrer fget te9ra hadik entrer li de5eltha nta mo9bil w tssoti direkte
 
-        printf("woul you provide the file's name : ");
+        printf("would you provide the file's name : ");
         fgets(name, 50, stdin); // scanf mais bach te9ra the hole line with space ( 3efssa te3 buffer)
         name[strcspn(name, "\n")] = '\0';
         puts("");
@@ -308,15 +309,17 @@ void DeleteFile(char name[50], int numoffile, MsHead* head){
     }
     
 
-    for (int i = 0; i < numoffile ; i++){
+    for (int i = 0; i < head->numberoffiles ; i++){
 
         if (strcmp(head->meta[i].name, name) == 0){
 
-            if(numoffile == 1){       // Si ily'a qu'un seul élément libérer la mémoire allouée 
+            if(head->numberoffiles == 1){       // Si il y'a qu'un seul élément libérer la mémoire allouée 
 
                 free(head->meta);
 
                 head->meta = NULL;      //NULL proposition ta3 chatgpt bech tiviti les pointeur "dangereux"
+
+                head->numberoffiles = 0;
 
             }else{
 
@@ -326,7 +329,7 @@ void DeleteFile(char name[50], int numoffile, MsHead* head){
 
                 }
 
-                numoffile--;     //Le nombre de fichier diminue de 1
+                head->numberoffiles--;     //Le nombre de fichier diminue de 1
 
                 printf("The file '%s' has been deleted.", name);
 
@@ -346,6 +349,58 @@ void DeleteFile(char name[50], int numoffile, MsHead* head){
 }
 
 
+
+
+void PopulateFile(int filenumber, int numofrecord, MsHead* head, int* FB){
+
+    bool exist = false;   //variable booleene initialiser a 'false' car on admet que le fichier n'existe pas
+
+    if (head == NULL || head->meta == NULL) {        //head ou head->meta ne sont pas allouée donc il ne peut pas y'avoir de fichier
+
+        printf("Error, invalid metadata structure.\n");
+
+        return;
+
+    }
+    
+    if (head->meta->filesizeRecord+numofrecord <= FB){     //3andna assez d'espace bech nzidou numofrecord
+        
+        for (int i = 0; i < head->numberoffiles; i++){     //boucle bech n7awes 3la file dyali
+        
+            if (filenumber == head->body->Bloc[i].id){
+                
+                exist = true;     //le fichier existe
+
+                for (int j = 0; j < numofrecord; j++){
+            
+                    insertRecord(head,filenumber,rand() % 128,FB);   //insert numofrecord record w comme data random char
+ 
+                }       
+            
+            }
+        
+        }
+
+        if(exist){
+        
+            head->meta->filesizeRecord+=numofrecord;   //mise a jour du nombre de record dans le fichier
+
+            printf("%d records successfully populated into file '%d'.\n",numofrecord,filenumber);
+        
+        }else{
+
+            printf("The file '%d' doesn't exist.",filenumber);
+
+        }
+        
+    }else{    // ma3andnach assez d'espace bech ndekhlou numofrecord
+
+        printf("Error: Not enough space to add '%d' record(s).\n",numofrecord);
+    
+    }
+    
+    
+}    
 
 
 
@@ -374,7 +429,7 @@ int main() {
     FILE *MS; MS = fopen("MemoryS.data","rt+");
 
     Bloc Buffer;
-    int NB, FB, organizationMode, interne,TaskChoice,filenumber, numoffile;
+    int NB, FB, organizationMode, interne,TaskChoice,filenumber, numoffile, numofrecord;
     int* allocation = NULL;
     char name[50];
     char newname[50];
@@ -395,17 +450,18 @@ int main() {
     printf("\n \nPlease select an operation   :\n");
     printf("1 - Initialize system\n");
     printf("2 - Create a new file\n");
-    printf("3 - Rename a file\n");
-    printf("4 - Add a record\n");
-    printf("5 - Search for record by ID\n");
-    printf("6 - Logically delete a record\n");
-    printf("7 - Physically delete a record\n");
-    printf("8 - Defragmentation\n");
-    printf("9 - Print file content\n");
-    printf("10 - Save file to disk\n");
-    printf("11 - Delete a file\n");
-    printf("12 - Clear memory structure\n");
-    printf("13 - Exit\n \n \n ");
+    printf("3 - Automatically fill a file\n");
+    printf("4 - Rename a file\n");
+    printf("5 - Add a record\n");
+    printf("6 - Search for record by ID\n");
+    printf("7 - Logically delete a record\n");
+    printf("8 - Physically delete a record\n");
+    printf("9 - Defragmentation\n");
+    printf("10 - Print file content\n");
+    printf("11 - Save file to disk\n");
+    printf("12 - Delete a file\n");
+    printf("13 - Clear memory structure\n");
+    printf("14 - Exit\n \n \n ");
 
     scanf("%d", &TaskChoice);
 
@@ -417,50 +473,54 @@ int main() {
             MsHead* head = createMS(allocation, NB, FB);
             break;
         case 2:
-        
             printf("Creating a new file...\n");
             createfile(head,name,20, &organizationMode, &interne,&head->numberoffiles,&FB,&NB);
             break;
         case 3:
+            printf("Please enter the ID of the file you want to automatically fill :\n");
+            scanf("%d", &filenumber);
+            printf("Can you please provide the number of record you want to insert :\n");
+            scanf("%d",&numofrecord);
+            PopulateFile(filenumber,numofrecord,head,FB);
+        case 4:
             printf("Renaming a file...\n");
             printf("please enter the file number that you want to rename");
             scanf("%d", &filenumber);
             Renamefile(head,newname,filenumber,head->numberoffiles);
             break;
-        case 4:
+        case 5:
             printf("Adding a record...\n");
             break;
-        case 5:
+        case 6:
             printf("Searching for record by ID...\n");
             break;
-        case 6:
+        case 7:
             printf("Logically deleting a record...\n");
             break;
-        case 7:
+        case 8:
             printf("Physically deleting a record...\n");
             break;
-        case 8:
+        case 9:
             printf("Defragmenting...\n");
             break;
-        case 9:
+        case 10:
             printf("Printing file content...\n");
             break;
-        case 10:
+        case 11:
             printf("Saving file to disk...\n");
             break;
-        case 11:
+        case 12:
             printf("Please enter the name of the file you want to delete :\n");
             fgets(name, 50, stdin);
             name[strcspn(name, "\n")] = '\0';
             puts("");
-            printf("Deleting a file...\n");
             DeleteFile(name, numoffile, head);
             break;
-        case 12:
+        case 13:
             printf("Clearing memory structure...\n");
             freeMS(head,NB);
             break;
-        case 13:
+        case 14:
             printf("Exiting the program. Goodbye!\n");
             exit(0);
         default:
