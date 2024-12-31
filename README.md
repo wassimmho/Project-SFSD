@@ -18,7 +18,10 @@ Provide a brief description of the project here.
 Details on the purpose of the project and what it aims to achieve.
 
 ## Tools Used
-List all the tools, libraries, and frameworks used in the project (e.g., C, Raylib, Raygui).
+**C Language**: Used for implementing the file management system, handling file operations, and managing memory.
+**Raylib**: Used for the graphical interface and interactive elements.([Raylib Official Site](https://www.raylib.com))
+![C Language Logo](/images/C_Programming_Language.svg.png)
+![Raylib Logo](/images/raylib_180x180.png)
 
 ## Installation
 Step-by-step instructions on how to install and set up the project on the user's local machine.
@@ -30,4 +33,4 @@ Instructions on how to use the program after installation, along with sample com
 An explanation of the project files and directories.
 
 ## Contributors
-List the names or GitHub profiles of the contributors to the project.
+[Mouhouche Wassim](https://github.com/wassimmho)
