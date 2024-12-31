@@ -8,12 +8,11 @@
 #include "../include/raylib.h"
 #include "../include/raygui.h"
 
-int main(void)
-{
+int main(void) {
     // Initialize the window with Raylib
     const int screenWidth = 1080;
     const int screenHeight = 920;
-    InitWindow(screenWidth, screenHeight, "Raygui with Raylib");
+    InitWindow(screenWidth, screenHeight, "Raygui with Navigation");
 
     // Set the target FPS (frames per second)
     SetTargetFPS(60);
@@ -22,101 +21,200 @@ int main(void)
     int rows = 5;  // Number of rows in the matrix
     int cols = 5;  // Number of columns in the matrix
     int blockSize = 100; // Size of each block (50x50)
+    int redCounter = 0; // Counter for free blocks
+    // Define colors
+    Color titleColor = GetColor(0xFF5733FF); // Title color
+    Color textColor = GetColor(0x0092FF); // Text color inside blocks
+    Color boxColor = (Color){0xBA, 0xFF, 0x66, 0xFF}; // Block color
+    char userInput[100] = ""; // Buffer to store user input
 
-    // Define color for text inside blocks
-    // Define title color
-    Color titleColor = GetColor(0xFF5733FF); // Equivalent to #FF5733
-    Color textColor = GetColor(0x0092ff);
-    Color boxColor = (Color){ 0xBA, 0xFF, 0x66, 0xFF }; 
+    // Track the current screen
+    int currentScreen = 0; // 0 = Main Page, 1 = Second Page
 
-    
     // Main game loop
-    while (!WindowShouldClose())
-    {
-        // Update
-        // (Add any game or UI logic here)
-
-        // Begin drawing
+    while (!WindowShouldClose()) {
         BeginDrawing();
-        
         ClearBackground(RAYWHITE); // Clear the background
 
-        // Drawing the title at the top
-        DrawText("Matrix of Blocks", 400, 20, 20, titleColor);
+        // Use a switch statement for navigation
+        switch (currentScreen) {
+            case 0: { // Main Page
+                DrawText("Main Page: Secondary Memory State", 400, 20, 20, titleColor);
 
-        // Drawing the buttons (your existing code)
-        if (GuiButton((Rectangle){0, 100, 75, 25}, "Initialize Secondary Memory"))
-        {
-            // Button clicked
-            DrawText("Button clicked!", 300, 200, 20, DARKGREEN);
-        }
+                // Drawing the buttons
+                if (GuiButton((Rectangle){50, 100, 150, 50}, "Initialize Secondary Memory")) {
+                    currentScreen = 1;
+                }
 
-        if (GuiButton((Rectangle){100, 100, 75, 25}, "Creat File"))
-        {
-            // Button clicked
-            DrawText("Button clicked!", 300, 200, 20, BLUE);
-        }
+                if (GuiButton((Rectangle){250, 100, 100, 50}, "Create File")) {
+                    currentScreen = 2;
+                }
 
-        if (GuiButton((Rectangle){200, 100, 75, 25}, "Rename File"))
-        {
-            // Button clicked
-            DrawText("Button clicked!", 300, 200, 20, BLACK);
-        }
+                if (GuiButton((Rectangle){400, 100, 100, 50}, "Rename File")) {
+                    currentScreen = 3;
+                }
 
-        if (GuiButton((Rectangle){300, 100, 75, 25}, "Insert Record"))
-        {
-            // Button clicked
-            DrawText("Button clicked!", 300, 200, 20, BLACK);
-        }
+                if (GuiButton((Rectangle){550, 100, 100, 50}, "Insert Record")) {
+                    currentScreen = 4;
+                }
 
-        if (GuiButton((Rectangle){400, 100, 75, 25}, "Free MS"))
-        {
-            // Button clicked
-            DrawText("Button clicked!", 300, 200, 20, BLACK);
-        }  
+                if (GuiButton((Rectangle){700, 100, 100, 50}, "Free MS")) {
+                    currentScreen = 5;
+                }
 
-        if (GuiButton((Rectangle){500, 100, 75, 25}, "Delete File"))
-        {
-            // Button clicked
-            DrawText("Button clicked!", 300, 200, 20, BLACK);
-        }
+                if (GuiButton((Rectangle){850, 100, 100, 50}, "Delete File")) {
+                    currentScreen = 6;
+                }
 
-        if (GuiButton((Rectangle){600, 100, 75, 25}, "Delete Record"))
-        {
-            // Button clicked
-            DrawText("Button clicked!", 300, 200, 20, BLACK);
-        }
+                if (GuiButton((Rectangle){1000, 100, 100, 50}, "Delete Record")) {
+                    currentScreen = 7;
+                }
 
-        if (GuiButton((Rectangle){700, 100, 75, 25}, "Exit program"))
-        {
-            // Button clicked
-            DrawText("Button clicked!", 300, 200, 20, BLACK);
-        }
+                DrawText(TextFormat("allocated memory blocs: %d", redCounter), 50, 200, 15, RED);                
 
-        // Drawing the square matrix of lime-colored blocks with text inside
-        for (int row = 0; row < rows; row++)
-        {
-            for (int col = 0; col < cols; col++)
-            {
-                // Calculate the position of each block
-                int x = 300 + col * (blockSize + 20); // Positioning blocks with some space between them
-                int y = 250 + row * (blockSize + 20);
-                
-                // Draw the lime-colored block (DrawRectangle(x, y, width, height, color))
-                DrawRectangle(x, y, blockSize, blockSize, boxColor);
+                // Draw the square matrix of lime-colored blocks with text inside
+                for (int row = 0; row < rows; row++) {
+                    for (int col = 0; col < cols; col++) {
+                        int x = 300 + col * (blockSize + 20); // Positioning blocks
+                        int y = 250 + row * (blockSize + 20);
 
-                // Draw the text inside the block (center the text)
-                char blockText[10];
-                snprintf(blockText, sizeof(blockText), "Block %d", row * cols + col + 1); // Example text for each block
-                DrawText(blockText, x + blockSize / 4, y + blockSize / 4, 15, textColor); // Center the text in the block
+                        DrawRectangle(x, y, blockSize, blockSize, boxColor); // Block
+                        char blockText[10];
+                        snprintf(blockText, sizeof(blockText), "Block %d", row * cols + col + 1); // Block label
+                        DrawText(blockText, x + blockSize / 4, y + blockSize / 4, 15, textColor); // Text
+                    }
+                }
+
+                break;
+            }
+            case 1: { // Second Page
+                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+
+                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+
+                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
+                    currentScreen = 0; // Go back to the main page
+                }
+
+                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                    CloseWindow();
+                    return 0;
+                }
+
+                break;
+            }
+
+            case 2: { // Second Page
+                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+
+                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+
+                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
+                    currentScreen = 0; // Go back to the main page
+                }
+
+                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                    CloseWindow();
+                    return 0;
+                }
+
+                break;
+            }
+
+
+            case 3: { // Second Page
+                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+
+                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+
+                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
+                    currentScreen = 0; // Go back to the main page
+                }
+
+                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                    CloseWindow();
+                    return 0;
+                }
+
+                break;
+            }
+
+            case 4: { // Second Page
+                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+
+                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+
+                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
+                    currentScreen = 0; // Go back to the main page
+                }
+
+                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                    CloseWindow();
+                    return 0;
+                }
+
+                break;
+            }
+
+
+            case 5: { // Second Page
+                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+
+                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+
+                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
+                    currentScreen = 0; // Go back to the main page
+                }
+
+                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                    CloseWindow();
+                    return 0;
+                }
+
+                break;
+            }
+
+
+            case 6: { // Second Page
+                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+
+                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+
+                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
+                    currentScreen = 0; // Go back to the main page
+                }
+
+                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                    CloseWindow();
+                    return 0;
+                }
+
+                break;
+            }
+
+            case 7: { // Second Page
+                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+
+                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+
+                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
+                    currentScreen = 0; // Go back to the main page
+                }
+
+                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                    CloseWindow();
+                    return 0;
+                }
+
+                break;
             }
         }
+        
 
         EndDrawing(); // End drawing
     }
 
     // De-initialization
     CloseWindow(); // Close window and OpenGL context
-
     return 0;
 }
