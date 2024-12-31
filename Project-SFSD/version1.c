@@ -329,9 +329,11 @@ void insertRecord(MsHead* head, int filenumber, char data, int* FB) {//insert re
 
 
 // Function to search for a record by ID
-void searchRecord(MsHead* head, int filenumber, int recordID, int* FB) {//search for a record by ID in the file
+void searchRecord(MsHead* head, int filenumber, int recordID, int* FB, int* blockNum, int* recordNum) {//search for a record by ID in the file
     if (filenumber >= head->numberoffiles) {//if the file number is invalid
         printf("Invalid file number.\n");
+        *blockNum = -1;
+        *recordNum = -1;
         return;
     }
 
@@ -342,40 +344,41 @@ void searchRecord(MsHead* head, int filenumber, int recordID, int* FB) {//search
             if (currentRecord.id == recordID) {//if the record id is the same as the one we are searching for
                 if (!currentRecord.deleted) {//if the record is not logically deleted
                     printf("Record found in block %d, entry %d.\n", i + 1, j + 1);
+                    *blockNum = i;
+                    *recordNum = j;
                     return;
                 } else {
                     printf("Record with ID %d is logically deleted.\n", recordID);//if the record is logically deleted
+                    *blockNum = -1;
+                    *recordNum = -1;
                     return;
                 }
             }
         }
     }
     printf("Record with ID %d not found.\n", recordID);
+    *blockNum = -1;
+    *recordNum = -1;
 } 
 
 
-// Function to logically delete a record
-void deleteRecord(MsHead* head, int filenumber, int recordID, int* FB) {
-    if (filenumber >= head->numberoffiles) {//if the file number is invalid
+void deleteRecord(MsHead* head, int filenumber, int recordID, int* FB) {// Function to logically delete a record
+    if (filenumber >= head->numberoffiles) {//ida le file makach 
         printf("Invalid file number.\n");
         return;
     }
 
-    for (int i = 0; i < head->meta[filenumber].filesizeBloc; i++) {//get the blocs of the file we want to search in
-        for (int j = 0; j < *FB; j++) {//search for the record in the bloc
-            if (head->body->Bloc[i].Data[j].id == recordID) {//if the record id is the same as the one we are searching for
-                if (!head->body->Bloc[i].Data[j].deleted) {
-                    head->body->Bloc[i].Data[j].deleted = true;//logically delete the record
-                    printf("Record with ID %d logically deleted.\n", recordID);//
-                    return;
-                } else {
-                    printf("Record with ID %d is already logically deleted.\n", recordID);
-                    return;
-                }
-            }
+    int blockNum, recordNum;//variables to store the block number and the record number
+    searchRecord(head, filenumber, recordID, FB, &blockNum, &recordNum);//search for the record li rana habin nfasoh
+    
+    if (blockNum != -1 && recordNum != -1) {//if the record exists
+        if (!head->body->Bloc[blockNum].Data[recordNum].deleted) {//if the record is not logically deleted
+            head->body->Bloc[blockNum].Data[recordNum].deleted = true;
+            printf("Record with ID %d logically deleted.\n", recordID);
+        } else {
+            printf("Record with ID %d is already logically deleted.\n", recordID);
         }
     }
-    printf("Record with ID %d not found.\n", recordID);
 }
 
 
@@ -594,7 +597,8 @@ int main() {
             scanf("%d", &filenumber);
             printf("please enter the record ID: ");
             scanf("%d", &IdOfFile);
-            searchRecord(head, filenumber, IdOfFile, &FB);
+            int blockNum, recordNum;
+            searchRecord(head, filenumber, IdOfFile, &FB, &blockNum, &recordNum);
             break;
         case 7:
             printf("Logically deleting a record...\n");
