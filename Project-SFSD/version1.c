@@ -530,30 +530,30 @@ void insertRecord(Meta* meta, Bloc* Bloc, int filenumber, char data, int* FB) {/
         }
     }
    printf("No space available to insert the record, we gonna allocate a new bloc for this record \n");
-    int newblockindex = head->meta[filenumber].filesizeBloc;//index ta3 nouveau bloc
-    head->meta[filenumber].filesizeBloc=head->meta[filenumber].filesizeBloc+1;//incrementation du nombre de blocs
+    int newblockindex = meta[filenumber].filesizeBloc;//index ta3 nouveau bloc
+    meta[filenumber].filesizeBloc=meta[filenumber].filesizeBloc+1;//incrementation du nombre de blocs
 
    
-    head->body->Bloc[newblockindex].Data = (Record*)malloc(*FB * sizeof(Record)); //allocation de la memoire pour le nouveau bloc
-    if (!head->body->Bloc[newblockindex].Data) {
+    Bloc[newblockindex].Data = (Record*)malloc(*FB * sizeof(Record)); //allocation de la memoire pour le nouveau bloc
+    if (!Bloc[newblockindex].Data) {
         printf("Memory allocation failed for new block.\n");
         return;
     }
 
     
-    head->body->Bloc[newblockindex].id = newblockindex; 
-    head->body->Bloc[newblockindex -1].next = newblockindex;//le dernier bloc pointe sur le nouveau bloc
-    head->body->Bloc[newblockindex].next = -1;// le dernier bloc m3ndoch 3la chkon ypointi
+    Bloc[newblockindex].id = newblockindex; 
+    Bloc[newblockindex -1].next = newblockindex;//le dernier bloc pointe sur le nouveau bloc
+    Bloc[newblockindex].next = -1;// le dernier bloc m3ndoch 3la chkon ypointi
 
     
-    head->body->Bloc[newblockindex].Data[0].id = 0;
-    head->body->Bloc[newblockindex].Data[0].data = data;
-    head->body->Bloc[newblockindex].Data[0].deleted = false;
+    Bloc[newblockindex].Data[0].id = 0;
+    Bloc[newblockindex].Data[0].data = data;
+    Bloc[newblockindex].Data[0].deleted = false;
 
    
     for (int j = 1; j < *FB; j++) {// initialisation ta3 les records li b9aw f le nouveau bloc
-        head->body->Bloc[newblockindex].Data[j].data = '\0';
-        head->body->Bloc[newblockindex].Data[j].deleted = false;
+        Bloc[newblockindex].Data[j].data = '\0';
+        Bloc[newblockindex].Data[j].deleted = false;
     }
 
     printf("New block allocated and record inserted successfully.\n");
@@ -563,7 +563,7 @@ void insertRecord(Meta* meta, Bloc* Bloc, int filenumber, char data, int* FB) {/
 
 
 // Function to search for a record by ID
-void searchRecord(MsHead* head, int filenumber, int recordID, int* FB) {//search for a record by ID in the file
+void searchRecord(MsHead* head, Meta* meta, Bloc* Bloc, int filenumber, int recordID, int* FB, int* blockNum, int* recordNum) {//search for a record by ID in the file
     if (filenumber >= head->numberoffiles) {//if the file number is invalid
         printf("Invalid file number.\n");
         *blockNum = -1;
@@ -592,18 +592,19 @@ void searchRecord(MsHead* head, int filenumber, int recordID, int* FB) {//search
     }
     printf("Record with ID %d not found.\n", recordID);
 }
+
 // Function to logically delete a record
-void deleteRecord(MsHead* head, int filenumber, int recordID, int* FB) {
+void deleteRecord(MsHead* head, Meta* meta, Bloc* Bloc, int filenumber, int recordID, int* FB) {
     if (filenumber >= head->numberoffiles) {//if the file number is invalid
         printf("Invalid file number.\n");
         return;
     }
 
-    for (int i = 0; i < head->meta[filenumber].filesizeBloc; i++) {//get the blocs of the file we want to search in
+    for (int i = 0; i < meta[filenumber].filesizeBloc; i++) {//get the blocs of the file we want to search in
         for (int j = 0; j < *FB; j++) {//search for the record in the bloc
-            if (head->body->Bloc[i].Data[j].id == recordID) {//if the record id is the same as the one we are searching for
-                if (!head->body->Bloc[i].Data[j].deleted) {
-                    head->body->Bloc[i].Data[j].deleted = true;//logically delete the record
+            if (Bloc[i].Data[j].id == recordID) {//if the record id is the same as the one we are searching for
+                if (!Bloc[i].Data[j].deleted) {
+                    Bloc[i].Data[j].deleted = true;//logically delete the record
                     printf("Record with ID %d logically deleted.\n", recordID);//
                     return;
                 } else {
@@ -616,8 +617,6 @@ void deleteRecord(MsHead* head, int filenumber, int recordID, int* FB) {
     printf("Record with ID %d not found.\n", recordID);
 }
 
-}
-*/
 
 /*----------------------------------------------------------------------------------------------------*/
 
@@ -832,12 +831,6 @@ void main(){
             break;
         case 8:
             printf("Physically deleting a record...\n");
-            /*printf("please enter the file number that you want to delete a record: ");
-            scanf("%d", &filenumber);
-            printf("please enter the record ID: ");
-            scanf("%d", &IdOfFile);
-            physicallyDeleteRecord(head, filenumber, IdOfFile, &FB);
-            */
             break;
         case 9:
             printf("Defragmenting...\n");
