@@ -20,6 +20,7 @@ Details on the purpose of the project and what it aims to achieve.
 ## Tools Used
 **C Language**: Used for implementing the file management system, handling file operations, and managing memory.
 **Raylib**: Used for the graphical interface and interactive elements.([Raylib Official Site](https://www.raylib.com))
+
 ![C Language Logo](/images/Clogo.png)
 ![Raylib Logo](/images/raylib_180x180.png)
 
@@ -57,7 +58,7 @@ SFSD/
 ├── Wlib/
 │   └── libraylib.a
 └── README.md
-
+```
 
 ## Contributors
 [Mouhouche Wassim](https://github.com/wassimmho)
