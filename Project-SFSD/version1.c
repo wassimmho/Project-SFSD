@@ -380,7 +380,35 @@ void deleteRecord(MsHead* head, int filenumber, int recordID, int* FB) {// Funct
         }
     }
 }
+/*void physicallyDeleteRecord(MsHead* head, int filenumber, int recordID, int* FB) {
+    if (filenumber >= head->numberoffiles) {
+        printf("Invalid file number.\n");
+        return;
+    }
 
+    int blockNum, recordNum;
+    searchRecord(head, filenumber, recordID, FB, &blockNum, &recordNum);
+    
+    if (blockNum != -1 && recordNum != -1) {
+        // Reset the record's data
+        head->body->Bloc[blockNum].Data[recordNum].data = '\0';
+        head->body->Bloc[blockNum].Data[recordNum].deleted = false;
+        
+        // Shift remaining records in the block to fill the gap
+        for (int j = recordNum; j < *FB - 1; j++) {
+            head->body->Bloc[blockNum].Data[j] = head->body->Bloc[blockNum].Data[j + 1];
+        }
+        
+        // Clear the last record in the block
+        head->body->Bloc[blockNum].Data[*FB - 1].data = '\0';
+        head->body->Bloc[blockNum].Data[*FB - 1].deleted = false;
+        head->body->Bloc[blockNum].Data[*FB - 1].id = *FB - 1;
+        
+        printf("Record with ID %d physically deleted.\n", recordID);
+    }
+
+}
+*/
 
 /*----------------------------------------------------------------------------------------------------*/
 
@@ -610,6 +638,12 @@ int main() {
             break;
         case 8:
             printf("Physically deleting a record...\n");
+            /*printf("please enter the file number that you want to delete a record: ");
+            scanf("%d", &filenumber);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            physicallyDeleteRecord(head, filenumber, IdOfFile, &FB);
+            */
             break;
         case 9:
             printf("Defragmenting...\n");
