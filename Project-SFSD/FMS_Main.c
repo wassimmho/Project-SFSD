@@ -669,7 +669,7 @@ void printFileContent(FILE *MS, FILE*HEAD, FILE *META, int org, int Inter, int F
 }
 
 //save a given file to the disc if there are enough space
-void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, int org, int inter, int FB, int NumBlocsFile, 
+void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[50], int org, int inter, int FB, int NumBlocsFile, 
         int NumRecordsFile, int firstBlocFile){
     
     rewind(MS);
@@ -681,12 +681,20 @@ void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, int org, int in
     MsHead HeadBuffer;
     DataFile FileBuffer;
 
-    fread(&FileBuffer, sizeof(FileBuffer), 1, File);
+    fread(&FileBuffer.data, sizeof(FileBuffer.data), 1, File);
+    strcpy(FileBuffer.name , filename);
+
+    fseek(META, 0, SEEK_END);
+    fread(&MetaBuffer, sizeof(MetaBuffer), 1, META);
+
+    FileBuffer.id = MetaBuffer.FileId + 1;
 
     bool alloc = allocateBlocs(MS, HEAD, META, FileBuffer, NumBlocsFile, NumRecordsFile, org, inter, FB);
     if(!alloc){
         return;
     }
+
+    
 }
 
 /*----------------------------------------------------------------------------------------------------*/
