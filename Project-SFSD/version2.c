@@ -12,7 +12,7 @@ int main(void) {
     // Initialize the window with Raylib
     const int screenWidth = 1080;
     const int screenHeight = 920;
-    InitWindow(screenWidth, screenHeight, "Raygui with Navigation");
+    InitWindow(screenWidth, screenHeight, "FILE MANAGEMENT SYSTEM");
 
     // Set the target FPS (frames per second)
     SetTargetFPS(60);
@@ -22,11 +22,22 @@ int main(void) {
     int cols = 5;  // Number of columns in the matrix
     int blockSize = 100; // Size of each block (50x50)
     int redCounter = 0; // Counter for free blocks
+    int fileCounter = 0; // Counter for free blocks
+    int interselectedMode = 0; // Selected mode (0 = Internal, 1 = External)
+    int GlobselectedMode = 0; // Selected mode (0 = Internal, 1 = External)
+
     // Define colors
     Color titleColor = GetColor(0xFF5733FF); // Title color
     Color textColor = GetColor(0x0092FF); // Text color inside blocks
     Color boxColor = (Color){0xBA, 0xFF, 0x66, 0xFF}; // Block color
+    // Draw the left frame with a different color for buttons
+    Color leftFrameColor = (Color){0x4D, 0x4D, 0x4D, 0xFF}; // Dark grey for the frame
     char userInput[100] = ""; // Buffer to store user input
+    char fileIDInput[100] = "";
+    char NumberofBlocs[2] = "";
+    char NumberofRecords[1] = "";
+    const char *globalOptions[] = {"Contiguous", "Chained"};  // Global options (Contiguous or Chained)
+    const char *internalOptions[] = {"Sorted", "Unsorted"};   // Internal options (Sorted or Unsorted)
 
     // Track the current screen
     int currentScreen = 0; // 0 = Main Page, 1 = Second Page
@@ -36,47 +47,63 @@ int main(void) {
         BeginDrawing();
         ClearBackground(RAYWHITE); // Clear the background
 
+        
+        
         // Use a switch statement for navigation
         switch (currentScreen) {
             case 0: { // Main Page
-                DrawText("Main Page: Secondary Memory State", 400, 20, 20, titleColor);
+                
+                
+                          
+                DrawRectangle(0, 0, 250, screenHeight, leftFrameColor); // Left frame
+                
+                
+                
 
-                // Drawing the buttons
+                // Drawing the buttons in the left frame
                 if (GuiButton((Rectangle){50, 100, 150, 50}, "Initialize Secondary Memory")) {
                     currentScreen = 1;
                 }
 
-                if (GuiButton((Rectangle){250, 100, 100, 50}, "Create File")) {
+                if (GuiButton((Rectangle){50, 180, 150, 50}, "Create File")) {
                     currentScreen = 2;
                 }
 
-                if (GuiButton((Rectangle){400, 100, 100, 50}, "Rename File")) {
+                if (GuiButton((Rectangle){50, 260, 150, 50}, "Rename File")) {
                     currentScreen = 3;
                 }
 
-                if (GuiButton((Rectangle){550, 100, 100, 50}, "Insert Record")) {
+                if (GuiButton((Rectangle){50, 340, 150, 50}, "Insert Record")) {
                     currentScreen = 4;
                 }
 
-                if (GuiButton((Rectangle){700, 100, 100, 50}, "Free MS")) {
+                if (GuiButton((Rectangle){50, 420, 150, 50}, "Free MS")) {
                     currentScreen = 5;
                 }
 
-                if (GuiButton((Rectangle){850, 100, 100, 50}, "Delete File")) {
+                if (GuiButton((Rectangle){50, 500, 150, 50}, "Delete File")) {
                     currentScreen = 6;
                 }
 
-                if (GuiButton((Rectangle){1000, 100, 100, 50}, "Delete Record")) {
+                if (GuiButton((Rectangle){50, 580, 150, 50}, "Delete Record")) {
                     currentScreen = 7;
                 }
 
-                DrawText(TextFormat("allocated memory blocs: %d", redCounter), 50, 200, 15, RED);                
+                // Displaying information on the bigger section
+                DrawText(TextFormat("Allocated memory blocks: %d", redCounter), 50, 800, 15, WHITE);
+                DrawText(TextFormat("Number of files: %d", fileCounter), 50, 830, 15, WHITE);
 
-                // Draw the square matrix of lime-colored blocks with text inside
+                // White background for the bigger section (Right part of the screen)
+                DrawRectangle(250, 0, screenWidth - 250, screenHeight, RAYWHITE);
+                // Title
+                // Title at the top of the bigger section (Centered)
+                DrawText("Main Page: Secondary Memory State", 400 , 50, 25, RED);
+
+                // Matrix drawing below the title, within the bigger white section
                 for (int row = 0; row < rows; row++) {
                     for (int col = 0; col < cols; col++) {
-                        int x = 300 + col * (blockSize + 20); // Positioning blocks
-                        int y = 250 + row * (blockSize + 20);
+                        int x = 350 + col * (blockSize + 20); // Positioning blocks
+                        int y = 150 + row * (blockSize + 20);
 
                         DrawRectangle(x, y, blockSize, blockSize, boxColor); // Block
                         char blockText[10];
@@ -88,15 +115,41 @@ int main(void) {
                 break;
             }
             case 1: { // Second Page
-                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
 
-                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+                // Draw Left frame
+                DrawRectangle(0, 0, 250, screenHeight, leftFrameColor); // Left frame
+                DrawText("Rename File", 450, 30, 25, titleColor);
 
-                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
+                // User Input for New File Name
+                DrawText("Provide Number of blocs in MS:", 400, 200, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 230, 300, 30}, NumberofBlocs, sizeof(NumberofBlocs), true);
+
+                // User Input for File ID
+                DrawText("Enter Number of Records in a Bloc:", 400, 270, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 300, 300, 30}, NumberofRecords, sizeof(NumberofRecords), true);
+
+                // Title
+                // DrawText("Select the storage mode", 300, 100, 20, DARKGRAY);
+
+                // Title
+                // DrawText("Select Global Organization mode", 300, 100, 20, DARKGRAY);
+
+                // Dropdown menu for choosing the mode
+                // GlobselectedMode = GuiComboBox((Rectangle){300, 200, 200, 30}, "Select Mode", globalOptions);
+
+                // Title
+                // DrawText("Select Internal Organization mode", 300, 100, 20, DARKGRAY);
+
+                // Dropdown menu for choosing the mode
+                // interselectedMode = GuiComboBox((Rectangle){300, 400, 200, 30}, "Select Mode", internalOptions);
+
+
+                // Buttons for navigation
+                if (GuiButton((Rectangle){50, 500, 150, 50}, "Go Back")) {
                     currentScreen = 0; // Go back to the main page
                 }
 
-                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                if (GuiButton((Rectangle){50, 600, 150, 50}, "Exit Program")) {
                     CloseWindow();
                     return 0;
                 }
@@ -104,16 +157,25 @@ int main(void) {
                 break;
             }
 
-            case 2: { // Second Page
-                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
 
-                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+            case 2: { // Create File
+                DrawRectangle(0, 0, 250, screenHeight, leftFrameColor); // Left frame
+                DrawText("Create File", 450, 30, 25, titleColor);
 
-                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
-                    currentScreen = 0; // Go back to the main page
+                // User Input for New File Name
+                DrawText("Provide File's Name:", 400, 200, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 230, 300, 30}, userInput, sizeof(userInput), true);
+
+                // User Input for File ID
+                DrawText("Size of the file in blocs:", 400, 270, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 300, 300, 30}, fileIDInput, sizeof(fileIDInput), true);
+
+                // Centered Buttons for Rename File Page
+                if (GuiButton((Rectangle){50, 500, 150, 50}, "Go Back")) {
+                    currentScreen = 0;
                 }
 
-                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                if (GuiButton((Rectangle){50, 600, 150, 50}, "Exit Program")) {
                     CloseWindow();
                     return 0;
                 }
@@ -121,17 +183,24 @@ int main(void) {
                 break;
             }
 
+            case 3: { // Insert Record
+                DrawRectangle(0, 0, 250, screenHeight, leftFrameColor); // Left frame
+                DrawText("Rename File", 450, 30, 25, titleColor);
 
-            case 3: { // Second Page
-                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+                // User Input for New File Name
+                DrawText("Provide File's New Name:", 400, 200, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 230, 300, 30}, userInput, sizeof(userInput), true);
 
-                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+                // User Input for File ID
+                DrawText("Enter File ID:", 400, 270, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 300, 300, 30}, fileIDInput, sizeof(fileIDInput), true);
 
-                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
-                    currentScreen = 0; // Go back to the main page
+                // Centered Buttons for Rename File Page
+                if (GuiButton((Rectangle){50, 500, 150, 50}, "Go Back")) {
+                    currentScreen = 0;
                 }
 
-                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                if (GuiButton((Rectangle){50, 600, 150, 50}, "Exit Program")) {
                     CloseWindow();
                     return 0;
                 }
@@ -140,33 +209,48 @@ int main(void) {
             }
 
             case 4: { // Second Page
-                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+                DrawRectangle(0, 0, 250, screenHeight, leftFrameColor); // Left frame
+                DrawText("Rename File", 450, 30, 25, titleColor);
 
-                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+                // User Input for New File Name
+                DrawText("Provide File's New Name:", 400, 200, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 230, 300, 30}, userInput, sizeof(userInput), true);
 
-                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
-                    currentScreen = 0; // Go back to the main page
+                // User Input for File ID
+                DrawText("Enter File ID:", 400, 270, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 300, 300, 30}, fileIDInput, sizeof(fileIDInput), true);
+
+                // Centered Buttons for Rename File Page
+                if (GuiButton((Rectangle){50, 500, 150, 50}, "Go Back")) {
+                    currentScreen = 0;
                 }
 
-                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                if (GuiButton((Rectangle){50, 600, 150, 50}, "Exit Program")) {
                     CloseWindow();
                     return 0;
                 }
 
                 break;
             }
-
 
             case 5: { // Second Page
-                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+                DrawRectangle(0, 0, 250, screenHeight, leftFrameColor); // Left frame
+                DrawText("Rename File", 450, 30, 25, titleColor);
 
-                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+                // User Input for New File Name
+                DrawText("Provide File's New Name:", 400, 200, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 230, 300, 30}, userInput, sizeof(userInput), true);
 
-                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
-                    currentScreen = 0; // Go back to the main page
+                // User Input for File ID
+                DrawText("Enter File ID:", 400, 270, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 300, 300, 30}, fileIDInput, sizeof(fileIDInput), true);
+
+                // Centered Buttons for Rename File Page
+                if (GuiButton((Rectangle){50, 500, 150, 50}, "Go Back")) {
+                    currentScreen = 0;
                 }
 
-                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                if (GuiButton((Rectangle){50, 600, 150, 50}, "Exit Program")) {
                     CloseWindow();
                     return 0;
                 }
@@ -174,17 +258,24 @@ int main(void) {
                 break;
             }
 
-
             case 6: { // Second Page
-                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+                DrawRectangle(0, 0, 250, screenHeight, leftFrameColor); // Left frame
+                DrawText("Rename File", 450, 30, 25, titleColor);
 
-                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+                // User Input for New File Name
+                DrawText("Provide File's New Name:", 400, 200, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 230, 300, 30}, userInput, sizeof(userInput), true);
 
-                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
-                    currentScreen = 0; // Go back to the main page
+                // User Input for File ID
+                DrawText("Enter File ID:", 400, 270, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 300, 300, 30}, fileIDInput, sizeof(fileIDInput), true);
+
+                // Centered Buttons for Rename File Page
+                if (GuiButton((Rectangle){50, 500, 150, 50}, "Go Back")) {
+                    currentScreen = 0;
                 }
 
-                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                if (GuiButton((Rectangle){50, 600, 150, 50}, "Exit Program")) {
                     CloseWindow();
                     return 0;
                 }
@@ -193,15 +284,23 @@ int main(void) {
             }
 
             case 7: { // Second Page
-                DrawText("Second Page: Additional Options", 400, 20, 20, titleColor);
+                DrawRectangle(0, 0, 250, screenHeight, leftFrameColor); // Left frame
+                DrawText("Rename File", 450, 30, 25, titleColor);
 
-                GuiTextBox((Rectangle){200, 200, 300, 30}, userInput, sizeof(userInput), true); // User input text box
+                // User Input for New File Name
+                DrawText("Provide File's New Name:", 400, 200, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 230, 300, 30}, userInput, sizeof(userInput), true);
 
-                if (GuiButton((Rectangle){200, 700, 150, 50}, "Go Back")) {
-                    currentScreen = 0; // Go back to the main page
+                // User Input for File ID
+                DrawText("Enter File ID:", 400, 270, 20, DARKGRAY);
+                GuiTextBox((Rectangle){400, 300, 300, 30}, fileIDInput, sizeof(fileIDInput), true);
+
+                // Centered Buttons for Rename File Page
+                if (GuiButton((Rectangle){50, 500, 150, 50}, "Go Back")) {
+                    currentScreen = 0;
                 }
 
-                if (GuiButton((Rectangle){500, 700, 150, 50}, "Exit Program")) {
+                if (GuiButton((Rectangle){50, 600, 150, 50}, "Exit Program")) {
                     CloseWindow();
                     return 0;
                 }
@@ -210,7 +309,6 @@ int main(void) {
             }
         }
         
-
         EndDrawing(); // End drawing
     }
 
