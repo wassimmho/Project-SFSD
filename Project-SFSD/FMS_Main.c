@@ -1,4 +1,4 @@
-#include "../include/header.h"
+
 #include "../include/raylib.h"
 
 #include <stdio.h>
@@ -173,11 +173,12 @@ void freeMS(FILE *MS, FILE *HEAD, FILE *META, int Org){
 
     //freeing the ms
     while(fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS)){
-        fseek(MS, sizeof(BlocBuffer), SEEK_CUR); 
+        
         BlocBuffer.Data = '\0'; // every data eraysed
         if(Org == 1){
             BlocBuffer.next = -1; // if the org is chained no more blocs are chained every bloc becomes independant
         }
+        fseek(MS, -sizeof(BlocBuffer), SEEK_CUR); 
         fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
 
         NB ++;
@@ -185,18 +186,19 @@ void freeMS(FILE *MS, FILE *HEAD, FILE *META, int Org){
 
 
     //freeing the head
-    fseek(HEAD, sizeof(HeadBuffer), SEEK_CUR);
+    fread(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
     HeadBuffer.alloca = (int*)malloc(NB * sizeof(int));
     for(int i =0;i<NB;i++){
         HeadBuffer.alloca[i]=0;
     }
     HeadBuffer.numberoffiles = 0;
+    seek(HEAD, -sizeof(HeadBuffer), SEEK_CUR);
     fwrite(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
 
 
     //freeing the Meta
     while(fread(&MetaBuffer, sizeof(MetaBuffer), 1, META)){
-        fseek(META, sizeof(MetaBuffer), SEEK_CUR);
+        
         strcpy(MetaBuffer.FileName, "\0");
         MetaBuffer.FileId = -1;
         MetaBuffer.filesizeBloc = 0;
@@ -205,6 +207,7 @@ void freeMS(FILE *MS, FILE *HEAD, FILE *META, int Org){
         MetaBuffer.Global = Org;
         MetaBuffer.Intern = -1;
 
+        fseek(META, -sizeof(MetaBuffer), SEEK_CUR);
         fwrite(&MetaBuffer, sizeof(MetaBuffer), 1, META);
     }
 }
@@ -258,12 +261,14 @@ void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
     fseek(META, File.id * sizeof(MetaBuffer), SEEK_SET);
     fread(&MetaBuffer, sizeof(MetaBuffer), 1, META);
 
+    int nrf;
+
     if(org == 0){
         fseek(MS, MetaBuffer.firstBlocaddress * sizeof(BlocBuffer), SEEK_SET);
         fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
-        for(int i =0;i<NumRecordsFile;i++){
+        for(int i =0;i<nrf;i++){
             BlocBuffer.Data[i].data = File.data[i];
-            if((i+1)  == FB){
+            if(i  == FB || i == nrf){
                 fseek(MS, -sizeof(BlocBuffer), SEEK_CUR);
                 fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
 
@@ -272,14 +277,17 @@ void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
                 }
 
                 fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+                i = 0;
+                nrf -= FB;
             }
         } 
     }else{
         fseek(MS, MetaBuffer.firstBlocaddress * sizeof(BlocBuffer), SEEK_SET);
         fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
-        for(int i =0;i<NumRecordsFile;i++){
+        for(int i =0;i<nrf;i++){
             BlocBuffer.Data[i].data = File.data[i];
-            if((i+1)  == FB){
+            if(i  == FB || i == nrf){
                 int next = BlocBuffer.next;
                 fseek(MS, -sizeof(BlocBuffer), SEEK_CUR);
                 fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
@@ -291,6 +299,9 @@ void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
                 rewind(MS);
                 fseek(MS, next * sizeof(BlocBuffer), SEEK_SET);
                 fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+                i = 0;
+                nrf -= FB;
             }
         }
     }
@@ -506,10 +517,128 @@ bool allocateBlocs(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsF
     return true;
 }
 
-void freeBlocs(FILE *MS, FILE*HEAD, FILE *META, int org, int Inter, int FB, int* BlocsId){
-    
+
+// free up a space used by a file 
+void freeBlocs(FILE *MS, FILE*HEAD, FILE *META, int org, int FB, int FileId){
+    rewind(MS);
+    rewind(HEAD);
+    rewind(META);
+
+    Bloc BlocBuffer;
+    Meta MetaBuffer;
+    MsHead HeadBuffer;
+
+    int NumRecordsFile;
+    int NumBlocsFile;
+    int firstBlocaddress;
+
+    if(org == 0){
+        fseek(&MetaBuffer, FileId * sizeof(MetaBuffer), SEEK_SET);
+        fread(&MetaBuffer, sizeof(MetaBuffer), 1, META);
+
+        strcpy(MetaBuffer.FileName, "\0");
+        MetaBuffer.FileId = -1;
+
+        NumBlocsFile = MetaBuffer.filesizeBloc;
+        MetaBuffer.filesizeBloc = 0;
+        
+        NumRecordsFile = MetaBuffer.filesizeRecord;
+        MetaBuffer.filesizeRecord = 0;
+
+        firstBlocaddress = MetaBuffer.firstBlocaddress;
+        MetaBuffer.firstBlocaddress = -1;
+
+        MetaBuffer.Global = org;
+        MetaBuffer.Intern = -1;
+        
+        fseek(MS, firstBlocaddress * sizeof(BlocBuffer), SEEK_SET);
+        fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+        for(int i =0; i<NumRecordsFile; i++){
+            BlocBuffer.Data[i].data = '\0';
+            if(i == FB || i == NumRecordsFile){
+                BlocBuffer.next = -1;
+                fseek(MS, -sizeof(BlocBuffer), SEEK_CUR);
+                fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+                i = 0;
+                NumRecordsFile -= FB;
+
+                fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+            }
+        }
+
+        fread(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
+
+        for(int i = FileId; i<(FileId + NumBlocsFile), i++;){
+            HeadBuffer.alloca[i] = 0;
+        }
+
+        fseek(HEAD, -sizeof(HeadBuffer), SEEK_CUR);
+        fwrite(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
+
+    }else{
+        fseek(&MetaBuffer, FileId * sizeof(MetaBuffer), SEEK_SET);
+        fread(&MetaBuffer, sizeof(MetaBuffer), 1, META);
+
+        strcpy(MetaBuffer.FileName, "\0");
+        MetaBuffer.FileId = -1;
+
+        NumBlocsFile = MetaBuffer.filesizeBloc;
+        MetaBuffer.filesizeBloc = 0;
+        
+        NumRecordsFile = MetaBuffer.filesizeRecord;
+        MetaBuffer.filesizeRecord = 0;
+
+        firstBlocaddress = MetaBuffer.firstBlocaddress;
+        MetaBuffer.firstBlocaddress = -1;
+
+        MetaBuffer.Global = org;
+        MetaBuffer.Intern = -1;
+        
+        fseek(MS, firstBlocaddress * sizeof(BlocBuffer), SEEK_SET);
+        fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+        fread(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
+        int current = firstBlocaddress;
+
+        for(int i =0; i<NumRecordsFile; i++){
+            BlocBuffer.Data[i].data = '\0';
+            if(i == FB || i == NumRecordsFile){
+                int next = BlocBuffer.next;
+                BlocBuffer.next = -1;
+
+                HeadBuffer.alloca[current] = 0;
+                current = next;
+
+                fseek(MS, -sizeof(BlocBuffer), SEEK_CUR);
+                fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+                i = 0;
+                NumRecordsFile -= FB;
+
+                rewind(MS);
+                fseek(MS, next * sizeof(BlocBuffer), SEEK_SET);
+                fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+            }
+        }
+
+        fseek(HEAD, -sizeof(HeadBuffer), SEEK_CUR);
+        fwrite(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
+
+    }
 }
 
+
+void printFileContent(FILE *MS, FILE*HEAD, FILE *META, int org, int Inter, int FB, int FileId){
+    rewind(MS);
+    rewind(HEAD);
+    rewind(META);
+
+    Bloc BlocBuffer;
+    Meta MetaBuffer;
+    MsHead HeadBuffer;
+}
 
 /*----------------------------------------------------------------------------------------------------*/
 
