@@ -662,7 +662,7 @@ void printFileContent(FILE *MS, FILE*HEAD, FILE *META, int org, int Inter, int F
 
 //save a given file to the disc if there are enough space
 void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[50], int org, int inter, int FB, int NumBlocsFile, 
-        int NumRecordsFile, int firstBlocFile){
+        int NumRecordsFile){
     
     rewind(MS);
     rewind(HEAD);
@@ -713,6 +713,45 @@ void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[5
     }
 
     
+}
+
+//load a specific file into an array of buffers the size of the file 
+Bloc* loadFileFromDisk(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int org, int FB){
+
+    rewind(MS);
+    rewind(HEAD);
+    rewind(META);
+
+    
+    Meta MetaBuffer;
+    MsHead HeadBuffer;
+
+    fseek(META, File.id * sizeof(MetaBuffer), SEEK_SET);
+    fread(&MetaBuffer, sizeof(MetaBuffer), 1, META); 
+    
+    Bloc BlocBuffer[MetaBuffer.filesizeBloc];
+
+    int i =0, j =0;
+    int nrf = MetaBuffer.filesizeRecord;
+    int nbf = MetaBuffer.filesizeBloc;
+
+    fseek(MS, MetaBuffer.firstBlocaddress * sizeof(BlocBuffer), SEEK_SET);
+    
+
+    while(i <= nbf){
+        while(j <= nrf){
+            fread(&BlocBuffer[i].Data[j], sizeof(BlocBuffer[i].Data[j]), 1, MS);
+            if(j == FB || j == nrf){
+                i ++;
+                j =0;
+                nrf -= FB;
+            }
+        }
+        
+    }
+
+    return BlocBuffer;
+
 }
 
 /*----------------------------------------------------------------------------------------------------*/
