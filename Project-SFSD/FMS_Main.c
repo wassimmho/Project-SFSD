@@ -48,6 +48,11 @@ typedef struct DataFile{
 //inter is the sorting mode and vector is the allocation table
 
 
+
+
+/*-------------------------------------- FAHD PART (AND WASSIM )---------------------------------------------------*/
+
+
 //updating and saving changes to the main memory
 void saveMs(FILE *MS, FILE *HEAD, FILE *META, FILE *Main_Memory, int NumFiles, int saveChoice){
     rewind(MS);
@@ -406,7 +411,7 @@ void renameFile(FILE *Main_Memory, FILE* MS, FILE *HEAD, FILE *META, DataFile Fi
     saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
 }
 
-/*-------------------------------------- FAHD PART ---------------------------------------------------*/
+
 
 //allocation or better said reservation of the blocs that a file needs
 bool allocateBlocs(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile, 
