@@ -632,12 +632,40 @@ void freeBlocs(FILE *MS, FILE*HEAD, FILE *META, int org, int FB, int FileId){
 
 void printFileContent(FILE *MS, FILE*HEAD, FILE *META, int org, int Inter, int FB, int FileId){
     rewind(MS);
-    rewind(HEAD);
     rewind(META);
 
     Bloc BlocBuffer;
     Meta MetaBuffer;
     MsHead HeadBuffer;
+
+    fseek(&MetaBuffer, FileId * sizeof(MetaBuffer), SEEK_SET);
+    fread(&MetaBuffer, sizeof(MetaBuffer), 1, META);
+    
+    fseek(MS, MetaBuffer.firstBlocaddress * sizeof(BlocBuffer), SEEK_SET);
+    fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+    if(org == 0){
+        for(int i =0; i<MetaBuffer.filesizeBloc; i++){
+            for(int j=0; j<FB; j++){
+                printf("%s  ",BlocBuffer.Data[j].data);
+            }
+            fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+        }
+    }else{
+        for(int i =0; i<MetaBuffer.filesizeBloc; i++){
+
+            for(int j=0; j<FB; j++){
+                printf("%s  ",BlocBuffer.Data[j].data);
+            }
+
+            int next = BlocBuffer.next;
+
+            rewind(MS);
+            fseek(MS, next * sizeof(BlocBuffer), SEEK_SET);
+            fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+            
+        }
+    }
 }
 
 /*----------------------------------------------------------------------------------------------------*/
