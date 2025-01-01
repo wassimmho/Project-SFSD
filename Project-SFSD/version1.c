@@ -741,45 +741,13 @@ void PopulateFile(int filenumber, int numofrecord, MsHead* head, Meta* meta, Blo
 
 
 /*-------------------------------------- STAMBOULI PART ----------------------------------------------*/
-typedef struct {
-    char data;   // Donnée
-    int id;      // ID d'enregistrement
-    bool deleted; // Suppression logique
-} Record;
-
-typedef struct {
-    int id;          // ID de bloc
-    Record *data;    // Tableau dynamique de données
-    int next;        // ID du prochain bloc ou -1 si dernier
-} Bloc;
-
-typedef struct {
-    char FileName[MAX_FILENAME]; // Nom du fichier
-    int FileId;
-    int filesizeBloc;       // Taille en blocs
-    int filesizeRecord;     // Taille en enregistrements
-    int firstBlocaddress;   // Adresse du premier bloc
-    bool Global;            // Mode global (1 = chaîné, 0 = contigu)
-    bool Intern;            // Organisation interne triée (1 = trié, 0 = non trié)
-} Metadata;
-
-typedef struct {
-    int *alloca;          // Tableau d'allocation
-    int numberoffiles;    // Nombre de fichiers
-} MsHead;
-
-typedef struct {
-    char name[MAX_FILENAME];
-    char *data;
-    int id;
-} DataFile;
 
 // Fonction pour la défragmentation
 void defragment_file(FILE *MS, FILE *HEAD, FILE *META, DataFile *File, int NumberBlocMax) {
     // Charger les métadonnées
-    Metadata meta;
-    fseek(META, sizeof(Metadata) * File->id, SEEK_SET);
-    fread(&meta, sizeof(Metadata), 1, META);
+    Meta meta;
+    fseek(META, sizeof(Meta) * File->id, SEEK_SET);
+    fread(&meta, sizeof(Meta), 1, META);
 
     if (meta.filesizeBloc <= 0) {
         printf("Erreur : Le fichier '%s' n'existe pas ou est vide.\n", File->name);
