@@ -272,10 +272,6 @@ void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
                 fseek(MS, -sizeof(BlocBuffer), SEEK_CUR);
                 fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
 
-                for(int k =0; k<FB; k++){
-                    fwrite(&BlocBuffer.Data[i], sizeof(BlocBuffer.Data[i]), 1, NEWFILE);
-                }
-
                 fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
 
                 i = 0;
@@ -292,10 +288,6 @@ void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
                 fseek(MS, -sizeof(BlocBuffer), SEEK_CUR);
                 fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
 
-                for(int k =0; k<FB; k++){
-                    fwrite(&BlocBuffer.Data[i], sizeof(BlocBuffer.Data[i]), 1, NEWFILE);
-                }
-                
                 rewind(MS);
                 fseek(MS, next * sizeof(BlocBuffer), SEEK_SET);
                 fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
@@ -692,6 +684,32 @@ void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[5
     bool alloc = allocateBlocs(MS, HEAD, META, FileBuffer, NumBlocsFile, NumRecordsFile, org, inter, FB);
     if(!alloc){
         return;
+    }
+
+    rewind(MS);
+    rewind(HEAD);
+    rewind(META);
+
+    fseek(MS, MetaBuffer.firstBlocaddress * sizeof(BlocBuffer), SEEK_SET);
+    fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+    int i =0;
+    int nrf = NumRecordsFile;
+
+    while(i <= nrf){
+        BlocBuffer.Data[i].data = FileBuffer.data[i];
+        if(i == FB || i == nrf){
+            int next = BlocBuffer.next;
+            fseek(MS, -sizeof(BlocBuffer), SEEK_CUR);
+            fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+            rewind(MS);
+            fseek(MS, next * sizeof(BlocBuffer), SEEK_SET);
+            fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+            i = 0;
+            nrf -= FB;
+        }
     }
 
     
