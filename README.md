@@ -62,3 +62,7 @@ SFSD/
 
 ## Contributors
 [Mouhouche Wassim](https://github.com/wassimmho)
+[Mouzali Hachemi Rayan](https://github.com/rayan3230)
+[Mehdi Benazza](https://github.com/MehdiBenazza)
+[Fahd sifeddine Djedi](https://github.com/FahdDjedi)
+[stambouli eleisse Abdellmouhssine](https://github.com/stamboulieleisse)
