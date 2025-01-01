@@ -12,10 +12,22 @@
 ---
 
 ## Overview
-Provide a brief description of the project here.
+This project simulates a File Management System (FMS), which is a key component of operating systems. The goal is to create a simplified simulator that models the fundamental principles of file management, such as organizing and handling files on secondary memory (disk storage).
+
+The simulator will replicate basic file system operations, including:
+
+    -Memory organization using blocks
+    -File space allocation
+    -File metadata management
+    -Common file operations such as creating, inserting, searching, and deleting files and records.
 
 ## General Information
-Details on the purpose of the project and what it aims to achieve.
+-Features
+Interactive Menu: Provides options to initialize memory, manage files, view memory status, and perform file operations.
+Memory Visualization: Displays free and occupied blocks in a graphical format.
+Metadata Viewing: Allows inspection of file metadata.
+File Operations: Create, search, insert, delete, and rename files or records.
+Memory Management: Includes defragmentation and space management options.
 
 ## Tools Used
 **C Language**: Used for implementing the file management system, handling file operations, and managing memory.
@@ -25,10 +37,50 @@ Details on the purpose of the project and what it aims to achieve.
 ![Raylib Logo](/images/raylib_180x180.png)
 
 ## Installation
-Step-by-step instructions on how to install and set up the project on the user's local machine.
+### Prerequisites
+
+- **C Compiler**: GCC for Linux, MinGW for Windows
+- **Raylib Installed**
+### Linux
+
+1.  Clone the repository :
+
+    ```bash
+        git clone https://github.com/wassimmho/Project-SFSD
+        cd Project-SFSD
+    ```
+
+2.  Build and Run the project :
+
+        ./build/build.sh
+
+### Windows
+
+1.  Clone the repository :
+
+    ```bash
+        git clone https://github.com/wassimmho/Project-SFSD
+        cd Project-SFSD
+    ```
+
+2.  Build and Run the project :
+
+        ./build/build.bat
 
 ## Usage
-Instructions on how to use the program after installation, along with sample commands or screenshots if necessary.
+This project provides an intuitive interface for managing files and records with various powerful features:
+
+**Add Files**: Easily add new files or records to the system.
+**Delete Files/Records**: Files and records can be deleted in two ways:
+        -**Logical Deletion**: Marks the file or record as deleted without removing it from the system.
+        -**Physical Deletion**: Completely removes the file or record from the system.
+**Insert Files**: Insert new files at any specified location within the project structure.
+**Rename Files**: Rename files to improve organization and clarity.
+**View Files/Records**: View detailed information or content of selected files or records.
+**Search**: Quickly search for files or records by name or other attributes to find what you're looking for.
+**Free MS**: This section allows users to manage all files and records freely, offering the flexibility to modify, move, or organize them without restrictions.
+**Save Changes**: Ensure all modifications made to the files, records, or structure are saved for future use.
+
 
 ## Project Structure
 An explanation of the project files and directories.
@@ -61,8 +113,9 @@ SFSD/
 ```
 
 ## Contributors
-[Mouhouche Wassim](https://github.com/wassimmho)
-[Mouzali Hachemi Rayan](https://github.com/rayan3230)
-[Mehdi Benazza](https://github.com/MehdiBenazza)
-[Fahd sifeddine Djedi](https://github.com/FahdDjedi)
-[stambouli eleisse Abdellmouhssine](https://github.com/stamboulieleisse)
+
+**Mouhouche Wassim** - [Mouhouche Wassim](https://github.com/wassimmho)
+**Mouzali Hachemi Rayan** - [Mouzali Hachemi Rayan](https://github.com/rayan3230)
+**Mehdi Benazza** - [Mehdi Benazza](https://github.com/MehdiBenazza)
+**Fahd sifeddine Djedi** - [Fahd sifeddine Djedi](https://github.com/FahdDjedi)
+**stambouli eleisse Abdellmouhssine** - [stambouli eleisse Abdellmouhssine](https://github.com/stamboulieleisse)
