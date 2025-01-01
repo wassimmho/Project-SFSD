@@ -240,7 +240,7 @@ int* numFreeBlocs(FILE *HEAD, int* lenght){
 
 //creaion of the file and saving it to the memory MS
 void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
-         int NumRecordsFile, int org, int Inter, int FB, int Numberbloc){
+         int NumRecordsFile, int org, int Inter, int FB){
 
     FILE* NEWFILE;
     NEWFILE = fopen(File.name, "wt+");
@@ -251,7 +251,7 @@ void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
     Meta MetaBuffer;
     MsHead HeadBuffer;
 
-    bool alloc = allocateBlocs(MS, HEAD, META, File, NumBlocsFile, NumRecordsFile, org, Inter, FB, Numberbloc);
+    bool alloc = allocateBlocs(MS, HEAD, META, File, NumBlocsFile, NumRecordsFile, org, Inter, FB);
     if(!alloc){
         return;
     }
@@ -328,7 +328,7 @@ void renameFile(FILE *META, DataFile File, char NewName[50]){
 
 //allocation or better said reservation of the blocs that a file needs
 bool allocateBlocs(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile, 
-        int NumRecordsFile, int org, int Inter, int FB, int Numberbloc){
+        int NumRecordsFile, int org, int Inter, int FB){
 
     rewind(MS);
     rewind(HEAD);
@@ -665,6 +665,27 @@ void printFileContent(FILE *MS, FILE*HEAD, FILE *META, int org, int Inter, int F
             fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
             
         }
+    }
+}
+
+//save a given file to the disc if there are enough space
+void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, int org, int inter, int FB, int NumBlocsFile, 
+        int NumRecordsFile, int firstBlocFile){
+    
+    rewind(MS);
+    rewind(HEAD);
+    rewind(META);
+
+    Bloc BlocBuffer;
+    Meta MetaBuffer;
+    MsHead HeadBuffer;
+    DataFile FileBuffer;
+
+    fread(&FileBuffer, sizeof(FileBuffer), 1, File);
+
+    bool alloc = allocateBlocs(MS, HEAD, META, FileBuffer, NumBlocsFile, NumRecordsFile, org, inter, FB);
+    if(!alloc){
+        return;
     }
 }
 
