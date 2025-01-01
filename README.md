@@ -23,11 +23,11 @@ The simulator will replicate basic file system operations, including:
 
 ## General Information
 -Features
-Interactive Menu: Provides options to initialize memory, manage files, view memory status, and perform file operations.
-Memory Visualization: Displays free and occupied blocks in a graphical format.
-Metadata Viewing: Allows inspection of file metadata.
-File Operations: Create, search, insert, delete, and rename files or records.
-Memory Management: Includes defragmentation and space management options.
+*Interactive Menu: Provides options to initialize memory, manage files, view memory status, and perform file operations.<br>
+*Memory Visualization: Displays free and occupied blocks in a graphical format.<br>
+*Metadata Viewing: Allows inspection of file metadata.<br>
+*File Operations: Create, search, insert, delete, and rename files or records.<br>
+*Memory Management: Includes defragmentation and space management options.<br>
 
 ## Tools Used
 **C Language**: Used for implementing the file management system, handling file operations, and managing memory.
@@ -114,8 +114,8 @@ SFSD/
 
 ## Contributors
 
-**Mouhouche Wassim** - [Mouhouche Wassim](https://github.com/wassimmho)
-**Mouzali Hachemi Rayan** - [Mouzali Hachemi Rayan](https://github.com/rayan3230)
-**Mehdi Benazza** - [Mehdi Benazza](https://github.com/MehdiBenazza)
-**Fahd sifeddine Djedi** - [Fahd sifeddine Djedi](https://github.com/FahdDjedi)
-**stambouli eleisse Abdellmouhssine** - [stambouli eleisse Abdellmouhssine](https://github.com/stamboulieleisse)
+**Mouhouche Wassim** - [Mouhouche Wassim](https://github.com/wassimmho)<br>
+**Mouzali Hachemi Rayan** - [Mouzali Hachemi Rayan](https://github.com/rayan3230)<br>
+**Mehdi Benazza** - [Mehdi Benazza](https://github.com/MehdiBenazza)<br>
+**Fahd sifeddine Djedi** - [Fahd sifeddine Djedi](https://github.com/FahdDjedi)<br>
+**stambouli eleisse Abdellmouhssine** - [stambouli eleisse Abdellmouhssine](https://github.com/stamboulieleisse)<br>
