@@ -7,6 +7,7 @@
 #include <time.h>
 #include "../include/raylib.h"
 #include "../include/raygui.h"
+#include "../include/header.h"
 
 int main(void) {
     // Initialize the window with Raylib
@@ -40,7 +41,7 @@ int main(void) {
     const char *internalOptions[] = {"Sorted", "Unsorted"};   // Internal options (Sorted or Unsorted)
 
     // Track the current screen
-    int currentScreen = 0; // 0 = Main Page, 1 = Second Page
+    int currentScreen = -1; 
 
     // Main game loop
     while (!WindowShouldClose()) {
@@ -51,6 +52,32 @@ int main(void) {
         
         // Use a switch statement for navigation
         switch (currentScreen) {
+
+
+             case -1: { // Second Page
+
+                DrawText(TextFormat("Welcom to your file management system"), 500, 20, 20, RED);
+                if (GuiButton((Rectangle){400, 300, 150, 50}, "Create MS")) {
+                    currentScreen = -2;
+                }
+                
+                
+                break;
+            }
+
+            case -2: { // Second Page
+
+                DrawText(TextFormat("Initialize MS"), 400, 50, 20, RED);
+                if (GuiButton((Rectangle){480, 300, 150, 50}, "Create MS")) {
+                    currentScreen = 0;
+                }
+                
+                
+                break;
+            }
+    
+
+
             case 0: { // Main Page
                 
                 
@@ -111,6 +138,11 @@ int main(void) {
                         DrawText(blockText, x + blockSize / 4, y + blockSize / 4, 15, textColor); // Text
                     }
                 }
+
+
+                
+
+
 
                 break;
             }
