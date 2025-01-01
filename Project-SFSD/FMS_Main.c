@@ -47,6 +47,87 @@ typedef struct DataFile{
 //NumberBloc is the number of blocs, FB is the number of records in each bloc, Org is the Orgnization mode, 
 //inter is the sorting mode and vector is the allocation table
 
+
+//updating and saving changes to the main memory
+void saveMs(FILE *MS, FILE *HEAD, FILE *META, FILE *Main_Memory, int NumFiles, int saveChoice){
+    rewind(MS);
+    rewind(HEAD);
+    rewind(META);
+
+    Bloc BlocBuffer;
+    Meta MetaBuffer;
+    MsHead HeadBuffer;
+
+    switch(saveChoice){
+        case 1:
+            rewind(MS);
+            rewind(HEAD);
+            rewind(META);
+
+            fseek(Main_Memory, 0, SEEK_SET);
+            fread(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
+            fwrite(&HeadBuffer, sizeof(HeadBuffer), 1, Main_Memory);
+            break;
+
+        case 2:
+            rewind(MS);
+            rewind(HEAD);
+            rewind(META);
+
+            fseek(Main_Memory, sizeof(HeadBuffer) + sizeof(MetaBuffer), SEEK_SET);
+            while(fread(&MetaBuffer, sizeof(MetaBuffer), 1, META)){
+                fwrite(&MetaBuffer, sizeof(MetaBuffer), 1, Main_Memory);
+            }
+
+            break;
+
+        case 3:
+            rewind(MS);
+            rewind(HEAD);
+            rewind(META);
+
+            fseek(Main_Memory, sizeof(HeadBuffer) + sizeof(MetaBuffer) * NumFiles + sizeof(BlocBuffer) , SEEK_SET);
+            while(fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS)){
+                fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, Main_Memory);
+            }
+            break;
+
+        case 4:
+            rewind(MS);
+            rewind(HEAD);
+            rewind(META);
+
+            fread(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
+            fwrite(&HeadBuffer, sizeof(HeadBuffer), 1, Main_Memory);
+
+            while(fread(&MetaBuffer, sizeof(MetaBuffer), 1, META)){
+                fwrite(&MetaBuffer, sizeof(MetaBuffer), 1, Main_Memory);
+            }
+
+            while(fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS)){
+                fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, Main_Memory);
+            }
+            break;
+        default :
+            rewind(MS);
+            rewind(HEAD);
+            rewind(META);
+
+            fread(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
+            fwrite(&HeadBuffer, sizeof(HeadBuffer), 1, Main_Memory);
+
+            while(fread(&MetaBuffer, sizeof(MetaBuffer), 1, META)){
+                fwrite(&MetaBuffer, sizeof(MetaBuffer), 1, Main_Memory);
+            }
+
+            while(fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS)){
+                fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, Main_Memory);
+            }
+            break;
+    }
+}
+
+//initialize the properties of the memory
 void initializeDisk(int* NumberBloc, int* FB, int* Org, int* inter) {
     do {
         printf("Enter the Bloc size factor (> 0): ");
@@ -72,7 +153,7 @@ void initializeDisk(int* NumberBloc, int* FB, int* Org, int* inter) {
 
 
 //creation of the memory as the file ms, head and meta in caps to differentiate tthem from files, variable or types 
-void CreatMS(int FB, int NumberBloc, int NumberFile, int Org){
+void CreatMS(FILE *Main_Memory, int FB, int NumberBloc, int NumberFile, int Org){
     FILE *MS;
     MS =fopen("memoryS.txt", "wt+");
 
@@ -153,14 +234,18 @@ void CreatMS(int FB, int NumberBloc, int NumberFile, int Org){
         fwrite(&Blocs, sizeof(Blocs), 1, MS);//write the blocs in the file
     }
 
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
+
     fclose(MS);
     fclose(HEAD);
     fclose(META);
+
+
 }
 
 
 // freeing the space in the memory
-void freeMS(FILE *MS, FILE *HEAD, FILE *META, int Org){
+void freeMS(FILE *Main_Memory, FILE *MS, FILE *HEAD, FILE *META, int Org, int NumberFile){
 
     rewind(MS);
     rewind(HEAD);
@@ -210,6 +295,8 @@ void freeMS(FILE *MS, FILE *HEAD, FILE *META, int Org){
         fseek(META, -sizeof(MetaBuffer), SEEK_CUR);
         fwrite(&MetaBuffer, sizeof(MetaBuffer), 1, META);
     }
+
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
 }
 
 //returns an array of the index of the free blocs in the memory
@@ -239,8 +326,8 @@ int* numFreeBlocs(FILE *HEAD, int* lenght){
 }
 
 //creaion of the file and saving it to the memory MS
-void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
-         int NumRecordsFile, int org, int Inter, int FB){
+void creatFile(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
+         int NumRecordsFile, int org, int Inter, int FB, int NumberFile){
 
     FILE* NEWFILE;
     NEWFILE = fopen(File.name, "wt+");
@@ -251,7 +338,7 @@ void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
     Meta MetaBuffer;
     MsHead HeadBuffer;
 
-    bool alloc = allocateBlocs(MS, HEAD, META, File, NumBlocsFile, NumRecordsFile, org, Inter, FB);
+    bool alloc = allocateBlocs(Main_Memory,MS, HEAD, META, File, NumBlocsFile, NumRecordsFile, org, Inter, FB, NumberFile);
     if(!alloc){
         return;
     }
@@ -298,10 +385,11 @@ void creatFile(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile,
         }
     }
 
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
 }
 
 //renaming a file
-void renameFile(FILE *META, DataFile File, char NewName[50]){
+void renameFile(FILE *Main_Memory, FILE* MS, FILE *HEAD, FILE *META, DataFile File, char NewName[50], int NumberFile){
     rewind(META);
 
     Meta MetaBuffer;
@@ -314,13 +402,15 @@ void renameFile(FILE *META, DataFile File, char NewName[50]){
 
     fseek(META, -sizeof(MetaBuffer), SEEK_CUR);
     fwrite(&MetaBuffer, sizeof(MetaBuffer), 1, META);
+
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
 }
 
 /*-------------------------------------- FAHD PART ---------------------------------------------------*/
 
 //allocation or better said reservation of the blocs that a file needs
-bool allocateBlocs(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile, 
-        int NumRecordsFile, int org, int Inter, int FB){
+bool allocateBlocs(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsFile, 
+        int NumRecordsFile, int org, int Inter, int FB, int NumberFile){
 
     rewind(MS);
     rewind(HEAD);
@@ -506,12 +596,14 @@ bool allocateBlocs(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int NumBlocsF
         }
     }
 
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
+
     return true;
 }
 
 
 // free up a space used by a file 
-void freeBlocs(FILE *MS, FILE*HEAD, FILE *META, int org, int FB, int FileId){
+void freeBlocs(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int org, int FB, int FileId, int NumberFile){
     rewind(MS);
     rewind(HEAD);
     rewind(META);
@@ -619,6 +711,8 @@ void freeBlocs(FILE *MS, FILE*HEAD, FILE *META, int org, int FB, int FileId){
         fwrite(&HeadBuffer, sizeof(HeadBuffer), 1, HEAD);
 
     }
+
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
 }
 
 
@@ -661,8 +755,8 @@ void printFileContent(FILE *MS, FILE*HEAD, FILE *META, int org, int Inter, int F
 }
 
 //save a given file to the disc if there are enough space
-void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[50], int org, int inter, int FB, int NumBlocsFile, 
-        int NumRecordsFile){
+void saveFileToDisk(FILE *Main_Memory, FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[50], int org, int inter, int FB, int NumBlocsFile, 
+        int NumRecordsFile, int NumberFile){
     
     rewind(MS);
     rewind(HEAD);
@@ -681,7 +775,7 @@ void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[5
 
     FileBuffer.id = MetaBuffer.FileId + 1;
 
-    bool alloc = allocateBlocs(MS, HEAD, META, FileBuffer, NumBlocsFile, NumRecordsFile, org, inter, FB);
+    bool alloc = allocateBlocs(Main_Memory,MS, HEAD, META, FileBuffer, NumBlocsFile, NumRecordsFile, org, inter, FB, NumberFile);
     if(!alloc){
         return;
     }
@@ -712,6 +806,7 @@ void saveFileToDisk(FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[5
         }
     }
 
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
     
 }
 
@@ -984,7 +1079,7 @@ void PopulateFile(int filenumber, int numofrecord, MsHead* head, Meta* meta, Blo
 
 /*-------------------------------------- STAMBOULI PART ----------------------------------------------*/
 // Fonction pour la défragmentation
-void defragment_file(FILE *MS, FILE *HEAD, FILE *META, DataFile *File, int NumberBlocMax) {
+void defragment_file(FILE *Main_Memory, FILE *MS, FILE *HEAD, FILE *META, DataFile *File, int NumberBlocMax, int NumberFile) {
     // Charger les métadonnées
     Meta meta;
     fseek(META, sizeof(Meta) * File->id, SEEK_SET);
@@ -1059,6 +1154,8 @@ void defragment_file(FILE *MS, FILE *HEAD, FILE *META, DataFile *File, int Numbe
     printf("Fichier '%s' défragmenté avec succès.\n", File->name);
 
     free(allocation_table);
+
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
 }
 
 
@@ -1071,6 +1168,10 @@ void defragment_file(FILE *MS, FILE *HEAD, FILE *META, DataFile *File, int Numbe
 
 void main(){
     // VARIABLES----------------
+
+        //----MAIN MEMORY FILE----
+        FILE* Main_Memory;
+        Main_Memory = fopen("Main_Memory.txt", "wt+");
 
         // BUFFERS------
         Bloc BlocBuffer;
