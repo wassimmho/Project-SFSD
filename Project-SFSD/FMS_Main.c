@@ -926,7 +926,83 @@ void PopulateFile(int filenumber, int numofrecord, MsHead* head, Meta* meta, Blo
 
 
 /*-------------------------------------- STAMBOULI PART ----------------------------------------------*/
+// Fonction pour la défragmentation
+void defragment_file(FILE *MS, FILE *HEAD, FILE *META, DataFile *File, int NumberBlocMax) {
+    // Charger les métadonnées
+    Meta meta;
+    fseek(META, sizeof(Meta) * File->id, SEEK_SET);
+    fread(&meta, sizeof(Meta), 1, META);
 
+    if (meta.filesizeBloc <= 0) {
+        printf("Erreur : Le fichier '%s' n'existe pas ou est vide.\n", File->name);
+        return;
+    }
+
+    // Charger la table d'allocation
+    MsHead ms_head;
+    fseek(HEAD, 0, SEEK_SET);
+    fread(&ms_head, sizeof(MsHead), 1, HEAD);
+
+    int *allocation_table = (int *)malloc(NumberBlocMax * sizeof(int));
+    fseek(HEAD, sizeof(MsHead), SEEK_SET);
+    fread(allocation_table, sizeof(int), NumberBlocMax, HEAD);
+
+    int current_block = meta.firstBlocaddress;
+    int new_start_block = -1;
+
+    // Trouver le premier bloc libre pour la défragmentation
+    for (int i = 0; i < NumberBlocMax; i++) {
+        if (allocation_table[i] == 0) {
+            new_start_block = i;
+            break;
+        }
+    }
+
+    if (new_start_block == -1) {
+        printf("Erreur : Pas d'espace libre pour défragmenter '%s'.\n", File->name);
+        free(allocation_table);
+        return;
+    }
+
+    int next_free_block = new_start_block;
+
+    // Réorganisation des blocs
+    for (int i = 0; i < meta.filesizeBloc; i++) {
+        Bloc bloc;
+        fseek(MS, current_block * sizeof(Bloc), SEEK_SET);
+        fread(&bloc, sizeof(Bloc), 1, MS);
+
+        // Écrire le bloc au nouvel emplacement
+        bloc.id = next_free_block;
+        fseek(MS, next_free_block * sizeof(Bloc), SEEK_SET);
+        fwrite(&bloc, sizeof(Bloc), 1, MS);
+
+        // Mettre à jour la table d'allocation
+        allocation_table[next_free_block] = 1;
+        allocation_table[current_block] = 0;
+
+        if (meta.Global && bloc.next != -1) {
+            current_block = bloc.next;
+        } else {
+            current_block++;
+        }
+
+        next_free_block++;
+    }
+
+    // Mise à jour des métadonnées
+    meta.firstBlocaddress = new_start_block;
+    fseek(META, sizeof(meta) * File->id, SEEK_SET);
+    fwrite(&meta, sizeof(meta), 1, META);
+
+    // Mise à jour de la table d'allocation
+    fseek(HEAD, sizeof(MsHead), SEEK_SET);
+    fwrite(allocation_table, sizeof(int), NumberBlocMax, HEAD);
+
+    printf("Fichier '%s' défragmenté avec succès.\n", File->name);
+
+    free(allocation_table);
+}
 
 
 /*--------------------------------------------------------------------------------------------------*/
