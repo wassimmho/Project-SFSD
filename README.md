@@ -1,5 +1,6 @@
 # File Management System (FMS)
-# Table of Contents
+
+## Table of Contents
 
 1. [Overview](#overview)
 2. [General Information](#general-information)
@@ -12,44 +13,54 @@
 ---
 
 ## Overview
-This project simulates a File Management System (FMS), which is a key component of operating systems. The goal is to create a simplified simulator that models the fundamental principles of file management, such as organizing and handling files on secondary memory (disk storage).
+The **File Management System (FMS)** is a project that simulates the core functionality of a file management system, an essential component of operating systems. It models fundamental principles such as organizing and managing files on secondary memory (disk storage).
 
-The simulator will replicate basic file system operations, including:
+### Key Features
+- **Memory Organization:** Simulates memory using blocks.
+- **File Space Allocation:** Handles file storage and management.
+- **File Metadata Management:** Tracks information about files.
+- **Basic File Operations:** Includes creating, inserting, searching, and deleting files and records.
 
-    -Memory organization using blocks
-    -File space allocation
-    -File metadata management
-    -Common file operations such as creating, inserting, searching, and deleting files and records.
+---
 
 ## General Information
--Features
-    Interactive Menu: Provides options to initialize memory, manage files, view memory status, and perform file operations.<br>
-    Memory Visualization: Displays free and occupied blocks in a graphical format.<br>
-    Metadata Viewing: Allows inspection of file metadata.<br>
-    File Operations: Create, search, insert, delete, and rename files or records.<br>
-    Memory Management: Includes defragmentation and space management options.<br>
+
+### Features
+- **Interactive Menu:** Offers options to initialize memory, manage files, view memory status, and perform operations.
+- **Memory Visualization:** Displays free and occupied memory blocks graphically.
+- **Metadata Viewing:** Allows inspection of file metadata.
+- **File Operations:**
+  - Add, search, insert, delete, and rename files or records.
+  - Logical and physical deletion options.
+- **Memory Management:** Includes defragmentation and space management features.
+
+---
 
 ## Tools Used
-**C Language**: Used for implementing the file management system, handling file operations, and managing memory.
-**Raylib**: Used for the graphical interface and interactive elements.([Raylib Official Site](https://www.raylib.com))
+- **C Language:** Implementation of file management logic and memory handling.
+- **Raylib:** Provides graphical interface and interactivity.  
+  [Raylib Official Site](https://www.raylib.com)
 
-![C Language Logo](/images/Clogo.png)
+![C Language Logo](/images/Clogo.png)  
 ![Raylib Logo](/images/raylib_180x180.png)
 
-## Installation
-### Prerequisites
+---
 
-- **C Compiler**: GCC for Linux, MinGW for Windows
-- **Raylib Installed**
+## Installation
+
+### Prerequisites
+- **C Compiler:** GCC for Linux, MinGW for Windows.
+- **Raylib Installed.**
+
+### Installation Steps
 ### Linux
 
-1.  Clone the repository :
-
-    ```bash
-        git clone https://github.com/wassimmho/Project-SFSD
-        cd Project-SFSD
+#### Linux
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/wassimmho/Project-SFSD
+   cd Project-SFSD
     ```
-
 2.  Build and Run the project :
 
         ./build/build.sh
@@ -68,18 +79,34 @@ The simulator will replicate basic file system operations, including:
         ./build/build.bat
 
 ## Usage
-This project provides an intuitive interface for managing files and records with various powerful features:
 
-**Add Files**: Easily add new files or records to the system.
-**Delete Files/Records**: Files and records can be deleted in two ways:
-        -**Logical Deletion**: Marks the file or record as deleted without removing it from the system.
-        -**Physical Deletion**: Completely removes the file or record from the system.
-**Insert Files**: Insert new files at any specified location within the project structure.
-**Rename Files**: Rename files to improve organization and clarity.
-**View Files/Records**: View detailed information or content of selected files or records.
-**Search**: Quickly search for files or records by name or other attributes to find what you're looking for.
-**Free MS**: This section allows users to manage all files and records freely, offering the flexibility to modify, move, or organize them without restrictions.
-**Save Changes**: Ensure all modifications made to the files, records, or structure are saved for future use.
+This project provides an intuitive interface for managing files and records, offering the following powerful features:
+
+- **Add Files:**  
+  Easily add new files or records to the system.
+
+- **Delete Files/Records:**  
+  Files and records can be deleted in two ways:  
+  - **Logical Deletion:** Marks the file or record as deleted without removing it from the system.  
+  - **Physical Deletion:** Completely removes the file or record from the system.
+
+- **Insert Files:**  
+  Insert new files at any specified location within the project structure.
+
+- **Rename Files:**  
+  Rename files to improve organization and clarity.
+
+- **View Files/Records:**  
+  View detailed information or content of selected files or records.
+
+- **Search:**  
+  Quickly search for files or records by name or other attributes to find what you're looking for.
+
+- **Free MS (Memory Space):**  
+  This section allows users to manage all files and records freely, offering the flexibility to modify, move, or organize them without restrictions.
+
+- **Save Changes:**  
+  Ensure all modifications made to the files, records, or structure are saved for future use.
 
 
 ## Project Structure
