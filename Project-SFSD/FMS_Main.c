@@ -859,73 +859,68 @@ Bloc* loadFileFromDisk(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int org, 
 
 /*-------------------------------------- MOZALI PART -------------------------------------------------*/
 
-void insertRecord(Meta* meta, Bloc* Bloc, int filenumber, char data, int* FB) {//insert record in the file 
+void insertRecord(Meta* meta, Bloc* Block, int filenumber, char data, int* FB) {
+    Bloc buffer = Block[filenumber];  // Create buffer from the Bloc array
 
     for (int i = 0; i < meta[filenumber].filesizeBloc; i++) {
         for (int j = 0; j < *FB; j++) {
-            if (Bloc[i].Data[j].data == '\0') {
-                Bloc[i].Data[j].id = j;
-                Bloc[i].Data[j].data = data;
-                Bloc[i].Data[j].deleted = false;
+            if (buffer.Data[j].data == '\0') {
+                buffer.Data[j].id = j;
+                buffer.Data[j].data = data;
+                buffer.Data[j].deleted = false;
+                Block[filenumber] = buffer;  // Save changes back to array
                 printf("Record inserted successfully.\n");
                 return;
             }
         }
     }
-   printf("No space available to insert the record, we gonna allocate a new bloc for this record \n");
-    int newblockindex = meta[filenumber].filesizeBloc;//index ta3 nouveau bloc
-    meta[filenumber].filesizeBloc=meta[filenumber].filesizeBloc+1;//incrementation du nombre de blocs
+    printf("No space available to insert the record, we gonna allocate a new bloc for this record \n");
+    int newblockindex = meta[filenumber].filesizeBloc;
+    meta[filenumber].filesizeBloc = meta[filenumber].filesizeBloc + 1;
 
-   
-    Bloc[newblockindex].Data = (Record*)malloc(*FB * sizeof(Record)); //allocation de la memoire pour le nouveau bloc
-    if (!Bloc[newblockindex].Data) {
+    buffer.Data = (Record*)malloc(*FB * sizeof(Record));
+    if (!buffer.Data) {
         printf("Memory allocation failed for new block.\n");
         return;
     }
 
-    
-    Bloc[newblockindex].id = newblockindex; 
-    Bloc[newblockindex -1].next = newblockindex;//le dernier bloc pointe sur le nouveau bloc
-    Bloc[newblockindex].next = -1;// le dernier bloc m3ndoch 3la chkon ypointi
+    buffer.id = newblockindex;
+    buffer.next = -1;
 
-    
-    Bloc[newblockindex].Data[0].id = 0;
-    Bloc[newblockindex].Data[0].data = data;
-    Bloc[newblockindex].Data[0].deleted = false;
+    buffer.Data[0].id = 0;
+    buffer.Data[0].data = data;
+    buffer.Data[0].deleted = false;
 
-   
-    for (int j = 1; j < *FB; j++) {// initialisation ta3 les records li b9aw f le nouveau bloc
-        Bloc[newblockindex].Data[j].data = '\0';
-        Bloc[newblockindex].Data[j].deleted = false;
+    for (int j = 1; j < *FB; j++) {
+        buffer.Data[j].data = '\0';
+        buffer.Data[j].deleted = false;
     }
 
+    Block[filenumber] = buffer;  // Save the new block back to array
     printf("New block allocated and record inserted successfully.\n");
 }
 
-         
-
-
-// Function to search for a record by ID
-void searchRecord(MsHead* head, Meta* meta, Bloc* Bloc, int filenumber, int recordID, int* FB, int* blockNum, int* recordNum) {//search for a record by ID in the file
-    if (filenumber >= head->numberoffiles) {//if the file number is invalid
+void searchRecord(MsHead* head, Meta* meta, Bloc* Block, int filenumber, int recordID, int* FB, int* blockNum, int* recordNum) {
+    if (filenumber >= head->numberoffiles) {
         printf("Invalid file number.\n");
         *blockNum = -1;
         *recordNum = -1;
         return;
     }
 
-    for (int i = 0; i < meta[filenumber].filesizeBloc; i++) {//get the blocs of the file we want to search in
-        struct Bloc currentBloc = Bloc[i];//get the current bloc
+    Bloc buffer = Block[filenumber];  // Create buffer from the Bloc array
+
+    for (int i = 0; i < meta[filenumber].filesizeBloc; i++) {
         for (int j = 0; j < *FB; j++) {
-            Record currentRecord = currentBloc.Data[j];//get the current record in the bloc
-            if (currentRecord.id == recordID) {//if the record id is the same as the one we are searching for
-                if (!currentRecord.deleted) {//if the record is not logically deleted
+            Record currentRecord = buffer.Data[j];
+            if (currentRecord.id == recordID) {
+                if (!currentRecord.deleted) {
                     printf("Record found in block %d, entry %d.\n", i + 1, j + 1);
                     *blockNum = i;
                     *recordNum = j;
                     return;
                 } else {
-                    printf("Record with ID %d is logically deleted.\n", recordID);//if the record is logically deleted
+                    printf("Record with ID %d is logically deleted.\n", recordID);
                     *blockNum = -1;
                     *recordNum = -1;
                     return;
@@ -936,19 +931,21 @@ void searchRecord(MsHead* head, Meta* meta, Bloc* Bloc, int filenumber, int reco
     printf("Record with ID %d not found.\n", recordID);
 }
 
-// Function to logically delete a record
-void deleteRecord(MsHead* head, Meta* meta, Bloc* Bloc, int filenumber, int recordID, int* FB) {
-    if (filenumber >= head->numberoffiles) {//if the file number is invalid
+void deleteRecord(MsHead* head, Meta* meta, Bloc* Block, int filenumber, int recordID, int* FB) {
+    if (filenumber >= head->numberoffiles) {
         printf("Invalid file number.\n");
         return;
     }
 
-    for (int i = 0; i < meta[filenumber].filesizeBloc; i++) {//get the blocs of the file we want to search in
-        for (int j = 0; j < *FB; j++) {//search for the record in the bloc
-            if (Bloc[i].Data[j].id == recordID) {//if the record id is the same as the one we are searching for
-                if (!Bloc[i].Data[j].deleted) {
-                    Bloc[i].Data[j].deleted = true;//logically delete the record
-                    printf("Record with ID %d logically deleted.\n", recordID);//
+    Bloc buffer = Block[filenumber];  // Create buffer from the Bloc array
+
+    for (int i = 0; i < meta[filenumber].filesizeBloc; i++) {
+        for (int j = 0; j < *FB; j++) {
+            if (buffer.Data[j].id == recordID) {
+                if (!buffer.Data[j].deleted) {
+                    buffer.Data[j].deleted = true;
+                    Block[filenumber] = buffer;  // Save changes back to array
+                    printf("Record with ID %d logically deleted.\n", recordID);
                     return;
                 } else {
                     printf("Record with ID %d is already logically deleted.\n", recordID);
@@ -959,7 +956,40 @@ void deleteRecord(MsHead* head, Meta* meta, Bloc* Bloc, int filenumber, int reco
     }
     printf("Record with ID %d not found.\n", recordID);
 }
+void physicalDeleteRecord(MsHead* head, Meta* meta, Bloc* Block, int filenumber, int recordID, int* FB) {
+    if (filenumber >= head->numberoffiles) {
+        printf("Invalid file number.\n");
+        return;
+    }
 
+    int blockNum, recordNum;
+    Bloc buffer = Block[filenumber];  // Create buffer from the Bloc array
+
+    // Use searchRecord to find the record
+    searchRecord(head, meta, Block, filenumber, recordID, FB, &blockNum, &recordNum);
+
+    if (blockNum != -1 && recordNum != -1) {
+        // Shift all records after the deleted one
+        for (int j = recordNum; j < *FB - 1; j++) {
+            buffer.Data[j] = buffer.Data[j + 1];
+        }
+
+        // Clear the last record
+        buffer.Data[*FB - 1].data = '\0';
+        buffer.Data[*FB - 1].id = -1;
+        buffer.Data[*FB - 1].deleted = false;
+
+        // Update the metadata
+        meta[filenumber].filesizeRecord--;
+
+        // Save changes back to array
+        Block[filenumber] = buffer;
+
+        printf("Record with ID %d physically deleted.\n", recordID);
+    } else {
+        printf("Record with ID %d not found or already deleted.\n", recordID);
+    }
+}
 
 /*----------------------------------------------------------------------------------------------------*/
 
