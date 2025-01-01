@@ -23,11 +23,11 @@ The simulator will replicate basic file system operations, including:
 
 ## General Information
 -Features
-*Interactive Menu: Provides options to initialize memory, manage files, view memory status, and perform file operations.<br>
-*Memory Visualization: Displays free and occupied blocks in a graphical format.<br>
-*Metadata Viewing: Allows inspection of file metadata.<br>
-*File Operations: Create, search, insert, delete, and rename files or records.<br>
-*Memory Management: Includes defragmentation and space management options.<br>
+    Interactive Menu: Provides options to initialize memory, manage files, view memory status, and perform file operations.<br>
+    Memory Visualization: Displays free and occupied blocks in a graphical format.<br>
+    Metadata Viewing: Allows inspection of file metadata.<br>
+    File Operations: Create, search, insert, delete, and rename files or records.<br>
+    Memory Management: Includes defragmentation and space management options.<br>
 
 ## Tools Used
 **C Language**: Used for implementing the file management system, handling file operations, and managing memory.
