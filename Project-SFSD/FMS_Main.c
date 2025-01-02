@@ -1212,6 +1212,7 @@ void main(){
         Bloc BlocBuffer;
         Meta MetaBuffer;
         MsHead HeadBuffer;
+        DataFile FileBuffer;
 
         //VARIABLES--------
         int NumberBloc;
