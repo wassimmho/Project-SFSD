@@ -855,7 +855,8 @@ void insertRecord(Meta* meta, Bloc* Block, int filenumber, char data, int* FB) {
 
     for (int i = 0; i < meta[filenumber].filesizeBloc; i++) {
         for (int j = 0; j < *FB; j++) {
-            if (buffer.Data[j].data == '\0') {
+            if (buffer.Data[j].data == '\0')
+             {
                 buffer.Data[j].id = j;
                 buffer.Data[j].data = data;
                 buffer.Data[j].deleted = false;
@@ -891,7 +892,7 @@ void insertRecord(Meta* meta, Bloc* Block, int filenumber, char data, int* FB) {
     printf("New block allocated and record inserted successfully.\n");
 }
 
-void searchRecord(MsHead* head, Meta* meta, Bloc* Block, int filenumber, int recordID, int* FB, int* blockNum, int* recordNum) {
+void searchRecord(MsHead* head, Meta* meta, Bloc* Block , int filenumber, int recordID, int* FB, int* blockNum, int* recordNum) {
     if (filenumber >= head->numberoffiles) {
         printf("Invalid file number.\n");
         *blockNum = -1;
@@ -1178,9 +1179,10 @@ void main(){
 
         // BUFFERS------
         Bloc BlocBuffer;
-        Meta MetaBuffer;
+        Meta* MetaBuffer;
         MsHead HeadBuffer;
         DataFile FileBuffer;
+        MsHead* head = NULL;
 
         //VARIABLES--------
         int NumberBloc;
@@ -1188,6 +1190,7 @@ void main(){
         int Org;
         int inter;
         int NumberFile;
+        int IdOfFile;
         int lenghtFreeBlocArray; 
         int NumBlocsFile;
         int NumRecordsFile;
@@ -1196,6 +1199,10 @@ void main(){
         int recordID;
         int i = 0;
         int TaskChoice;
+
+
+       
+       
 
         //FILES-------(MS ,HEAD and META are created with creatMS() use it to creat them)---------
         DataFile File;
@@ -1246,12 +1253,28 @@ void main(){
             break;
         case 5:
             printf("Adding a record...\n");
+            printf("please enter the file number that you want to add a record");
+            scanf("%d", &NumberFile);
+            printf("please enter the record data");
+            scanf("%c", &BlocBuffer.Data[0].data);
+            insertRecord(head,NumberFile,BlocBuffer.Data[0].data,&FB);
             break;
         case 6:
             printf("Searching for record by ID...\n");
+            printf("please enter the file number that you want to search a record: ");
+            scanf("%d", &NumberFile);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            int blockNum, recordNum;
+            searchRecord(MetaBuffer, head, NumberFile, IdOfFile, &FB, &blockNum, &recordNum);
             break;
         case 7:
             printf("Logically deleting a record...\n");
+             printf("please enter the file number that you want to delete a record: ");
+            scanf("%d", &NumberFile);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            deleteRecord(head, NumberFile, IdOfFile, &FB);
             break;
         case 8:
             printf("Physically deleting a record...\n");
