@@ -850,45 +850,44 @@ Bloc* loadFileFromDisk(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int org, 
 }
 
 
-void insertRecord(Meta* meta, Bloc* Bloc, int filenumber, char data, int* FB) {
-    struct Bloc buffer = Bloc[filenumber];  // Create buffer from the Bloc array
+void insertRecord(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int NumberFile, 
+        int BlocId, int FB, Record Record, int NumberBloc) {
+    
+    rewind(MS);
+    rewind(HEAD);
+    rewind(META);
 
-    for (int i = 0; i < meta[filenumber].filesizeBloc; i++) {
-        for (int j = 0; j < *FB; j++) {
-            if (buffer.Data[j].data == '\0') {
-                buffer.Data[j].id = j;
-                buffer.Data[j].data = data;
-                buffer.Data[j].deleted = false;
-                Bloc[filenumber] = buffer;  // Save changes back to array
-                printf("Record inserted successfully.\n");
-                return;
-            }
-        }
-    }
-    printf("No space available to insert the record, we gonna allocate a new bloc for this record \n");
-    int newblockindex = meta[filenumber].filesizeBloc;
-    meta[filenumber].filesizeBloc = meta[filenumber].filesizeBloc + 1;
+    Bloc BlocBuffer;
+    Meta MetaBuffer;
+    MsHead HeadBuffer;
 
-    buffer.Data = (Record*)malloc(*FB * sizeof(Record));
-    if (!buffer.Data) {
-        printf("Memory allocation failed for new block.\n");
-        return;
+
+    fseek(MS, BlocId * sizeof(BlocBuffer), SEEK_SET);
+    fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+
+    int i =0;
+    while(BlocBuffer.Data[i].data != '\0'){
+        fread(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
+        i++;
     }
 
-    buffer.id = newblockindex;
-    buffer.next = -1;
+    if(i != FB){
+        BlocBuffer.Data[i] = Record;
+        BlocBuffer.Data[i].id = i;
+        BlocBuffer.Data[i].deleted = false;
+        fseek(MS, -sizeof(BlocBuffer), SEEK_SET);
+        fwrite(&BlocBuffer, sizeof(BlocBuffer), 1, MS);
 
-    buffer.Data[0].id = 0;
-    buffer.Data[0].data = data;
-    buffer.Data[0].deleted = false;
+    }else if(i == FB && BlocId != NumberBloc){
+        insertRecord(Main_Memory, MS, HEAD, META, NumberFile, BlocId + 1, FB, Record, NumberBloc);
 
-    for (int j = 1; j < *FB; j++) {
-        buffer.Data[j].data = '\0';
-        buffer.Data[j].deleted = false;
+    }else if(i == FB && BlocId == NumberBloc){
+        printf("no more space in the memory please free up some space ");
     }
 
-    Bloc[filenumber] = buffer;  // Save the new block back to array
-    printf("New block allocated and record inserted successfully.\n");
+    saveMs(MS, HEAD, META, Main_Memory, NumberFile, 3);
+
+    
 }
 
 Record searchRecord(FILE *MS, FILE *META, int FileNumber, int RecordNumber, int FB) {
@@ -1008,7 +1007,8 @@ void DeleteFile(char name[50], int numoffile, MsHead* head,  Meta* meta, Bloc* B
 
 }
 
-void PopulateFile(int filenumber, int numofrecord, MsHead* head, Meta* meta, Bloc* Bloc, int* FB){
+void PopulateFile(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int filenumber, 
+        int numofrecord, MsHead* head, Meta* meta, Bloc* Bloc, int FB, int NumberBloc, int NumberFile){
 
     bool exist = false;   //variable booleene initialiser a 'false' car on admet que le fichier n'existe pas
 
@@ -1020,7 +1020,7 @@ void PopulateFile(int filenumber, int numofrecord, MsHead* head, Meta* meta, Blo
 
     }
     
-    if (meta->filesizeRecord+numofrecord <= *FB){     //3andna assez d'espace bech nzidou numofrecord
+    if (meta->filesizeRecord+numofrecord <= FB){     //3andna assez d'espace bech nzidou numofrecord
         
         for (int i = 0; i < head->numberoffiles; i++){     //boucle bech n7awes 3la file dyali
         
@@ -1029,8 +1029,12 @@ void PopulateFile(int filenumber, int numofrecord, MsHead* head, Meta* meta, Blo
                 exist = true;     //le fichier existe
 
                 for (int j = 0; j < numofrecord; j++){
-            
-                    insertRecord(meta, Bloc, filenumber,rand() % 128,FB);   //insert numofrecord record w comme data random char
+
+                    Record Record;
+                    Record.data = rand() % 128;
+                    Record.deleted = false;
+                    insertRecord(Main_Memory, MS, HEAD, META, NumberFile, i + 1, 
+                        FB, Record, NumberBloc);   //insert numofrecord record w comme data random char
                     
                 }       
             
@@ -1155,10 +1159,10 @@ void main(){
 
         // BUFFERS------
         Bloc BlocBuffer;
-        Meta* MetaBuffer;
+        Meta MetaBuffer;
         MsHead HeadBuffer;
         DataFile FileBuffer;
-        MsHead* head = NULL;
+        Record RecordBuffer;
 
         //VARIABLES--------
         Bloc* Bloc;
@@ -1238,7 +1242,11 @@ void main(){
             scanf("%d", &NumberFile);
             printf("please enter the record data");
             scanf("%c", &BlocBuffer.Data[0].data);
-            insertRecord(MetaBuffer, head, NumberFile, BlocBuffer.Data[0].data , &FB);
+            printf("\n enter the data you want to insert  : ");
+            scanf("%c", RecordBuffer.data);
+            
+            insertRecord(Main_Memory, MS, HEAD, META, NumberFile, BlocId + 1, FB, RecordBuffer, NumberBloc);
+
             break;
         case 6:
             printf("Searching for record by ID...\n");
