@@ -960,51 +960,28 @@ void physicalDeleteRecord(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, in
 void DeleteFile(char name[50], int numoffile, MsHead* head,  Meta* meta, Bloc* Bloc){
 
     if (head == NULL || meta == NULL) {        //head ou head->meta ne sont pas allouée donc il ne peut pas y'avoir de fichier
-
         printf("Error, invalid metadata structure.\n");
-
         return;
-
     }
     
-
     for (int i = 0; i < head->numberoffiles ; i++){
-
         if (strcmp(meta[i].FileName, name) == 0){
-
             if(head->numberoffiles == 1){       // Si il y'a qu'un seul élément libérer la mémoire allouée 
-
                 free(meta);
-
                 meta = NULL;      //NULL proposition ta3 chatgpt bech tiviti les pointeur "dangereux"
-
                 head->numberoffiles = 0;
-
             }else{
-
                 for (int j = i; j < numoffile-1; j++){    //Ecraser le fichier qu'on veut supprimer et decaler les autres fichiers
-
                     meta[j]=meta[j+1];
-
                 }
-
                 head->numberoffiles--;     //Le nombre de fichier diminue de 1
-
                 printf("The file '%s' has been deleted.", name);
-
                 return ;
-
             }    
-            
         }
-        
-    
     }
-
     printf("The file '%s' doesn't exist.", name);      //Si le fichier n'existe pas
-
     return ;
-
 }
 
 void PopulateFile(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int filenumber, 
@@ -1013,51 +990,33 @@ void PopulateFile(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int filenu
     bool exist = false;   //variable booleene initialiser a 'false' car on admet que le fichier n'existe pas
 
     if (head == NULL || meta == NULL) {        //head ou head->meta ne sont pas allouée donc il ne peut pas y'avoir de fichier
-
         printf("Error, invalid metadata structure.\n");
-
         return;
-
     }
     
     if (meta->filesizeRecord+numofrecord <= FB){     //3andna assez d'espace bech nzidou numofrecord
-        
         for (int i = 0; i < head->numberoffiles; i++){     //boucle bech n7awes 3la file dyali
-        
             if (filenumber == Bloc[i].id){
-                
                 exist = true;     //le fichier existe
-
                 for (int j = 0; j < numofrecord; j++){
-
                     Record Record;
                     Record.data = rand() % 128;
                     Record.deleted = false;
                     insertRecord(Main_Memory, MS, HEAD, META, NumberFile, i + 1, 
-                        FB, Record, NumberBloc);   //insert numofrecord record w comme data random char
-                    
-                }       
-            
+                        FB, Record, NumberBloc);   //insert numofrecord record w comme data random char  
+                }
             }
-        
         }
 
         if(exist){
-        
             meta->filesizeRecord+=numofrecord;   //mise a jour du nombre de record dans le fichier
-
             printf("%d records successfully populated into file '%d'.\n",numofrecord,filenumber);
-        
         }else{
-
             printf("The file '%d' doesn't exist.",filenumber);
-
         }
         
     }else{    // ma3andnach assez d'espace bech ndekhlou numofrecord
-
         printf("Error: Not enough space to add '%d' record(s).\n",numofrecord);
-    
     }
     
     
