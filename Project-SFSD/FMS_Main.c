@@ -1217,9 +1217,9 @@ void main(){
             CreatMS(Main_Memory, FB,NumberBloc, NumberFile, Org);
             break;
         case 3:
-            printf("Please enter the ID of the file you want to automatically fill :\n");
+            printf("Please enter the ID of the file you want to automatically fill :  ");
             scanf("%d", &FileId);
-            printf("\nenter the number of records to fill  :  ");
+            printf("\n enter the number of records to fill  :  ");
             scanf("%d", &RecordNumber);
 
             rewind(Main_Memory);
@@ -1236,9 +1236,9 @@ void main(){
             char NewName[50];
             printf("enter the Id of your file  : ");
             scanf("%d", &FileBuffer.id);
-            printf("enter the old name of your file  :  ");
+            printf("\n enter the old name of your file  :  ");
             scanf("%d", &FileBuffer.name);
-            printf("enter the new name of your file  :  ");
+            printf("\n enter the new name of your file  :  ");
             scanf("%s", &NewName);
 
             renameFile(Main_Memory, MS, HEAD, META, FileBuffer, NewName, NumberFile);
@@ -1248,7 +1248,7 @@ void main(){
             printf("Adding a record...\n");
             printf("please enter the file number that you want to add a record");
             scanf("%d", &NumberFile);
-            printf("please enter the record data");
+            printf("\n please enter the record data");
             scanf("%c", &BlocBuffer.Data[0].data);
             printf("\n enter the data you want to insert  : ");
             scanf("%c", &RecordBuffer.data);
@@ -1260,7 +1260,7 @@ void main(){
             printf("Searching for record by ID...\n");
             printf("please enter the file number that you want to search a record: ");
             scanf("%d", &FileNumber);
-            printf("please enter the record ID: ");
+            printf("\n please enter the record ID: ");
             scanf("%d", &RecordNumber);
 
             searchRecord(MS, HEAD, META, FileNumber, 
@@ -1270,9 +1270,9 @@ void main(){
             printf("Logically deleting a record...\n");
             printf("please enter the file number that you want to delete a record: ");
             scanf("%d", &FileNumberOfRecord);
-            printf("please enter the record ID: ");
+            printf("\n please enter the record ID: ");
             scanf("%d", &recordID);
-            printf("and its bloc Id  :  ");
+            printf("\n and its bloc Id  :  ");
             scanf("%d", &BlocId);
 
             deleteRecord(Main_Memory, MS, HEAD, META, NumberFile, 
@@ -1283,9 +1283,9 @@ void main(){
             printf("Physically deleting a record...\n");
             printf("please enter the file number that you want to delete a record: ");
             scanf("%d", &FileNumberOfRecord);
-            printf("please enter the record ID: ");
+            printf("\n please enter the record ID: ");
             scanf("%d", &recordID);
-            printf("and its bloc Id  :  ");
+            printf("\n and its bloc Id  :  ");
             scanf("%d", &BlocId);
 
             physicallyDeleteRecord(Main_Memory, MS, HEAD, META, NumberFile, 
@@ -1318,7 +1318,7 @@ void main(){
             FILE* File;
             File = fopen(&FilePath, "rt");
 
-            printf("name your file  :  ");
+            printf("\n name your file  :  ");
             scanf("%s", &filename);
 
             saveFileToDisk(Main_Memory, File, MS, HEAD, META, filename, Org, inter, FB, NumBlocsFile, NumRecordsFile, NumberFile);
@@ -1327,7 +1327,7 @@ void main(){
         case 12:
             printf("Please enter the name of the file you want to delete :\n");
             scanf("%s", &filename);
-            printf("enter the id of your file  :  ");
+            printf("\n enter the id of your file  :  ");
             scanf("%d", &FileId);
             
             rewind(Main_Memory);
