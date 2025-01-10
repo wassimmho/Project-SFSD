@@ -1218,6 +1218,18 @@ void main(){
             break;
         case 3:
             printf("Please enter the ID of the file you want to automatically fill :\n");
+            scanf("%d", &FileId);
+            printf("\nenter the number of records to fill  :  ");
+            scanf("%d", &RecordNumber);
+
+            rewind(Main_Memory);
+
+            fread(&Head, sizeof(Head), 1, Main_Memory);
+            fread(&Metas, sizeof(Metas), 1, Main_Memory);
+            fread(&Blocs, sizeof(Blocs), 1, Main_Memory);
+
+            PopulateFile(Main_Memory, MS, HEAD, META, NumberFile, Head, Metas, Blocs, FB, NumberBloc, NumberFile);
+
             break;
         case 4:
             printf("Renaming a file...\n");
@@ -1317,6 +1329,8 @@ void main(){
             scanf("%s", &filename);
             printf("enter the id of your file  :  ");
             scanf("%d", &FileId);
+            
+            rewind(Main_Memory);
 
             fread(&Head, sizeof(Head), 1, Main_Memory);
             fread(&Metas, sizeof(Metas), 1, Main_Memory);
