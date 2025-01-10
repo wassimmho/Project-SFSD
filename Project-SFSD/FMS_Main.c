@@ -197,7 +197,7 @@ void CreatMS(FILE *Main_Memory, int FB, int NumberBloc, int NumberFile, int Org)
     }
 
     //allocation of the blocs for the memory
-     Bloc* Blocs = (Bloc*)malloc(NumberBloc * sizeof(Bloc));
+    Bloc* Blocs = (Bloc*)malloc(NumberBloc * sizeof(Bloc));
     if (!Blocs) {
         printf("Memory allocation failed for Blocs\n");
         free(Blocs);
@@ -756,8 +756,8 @@ void printFileContent(FILE *MS, FILE*HEAD, FILE *META, int org, int Inter, int F
 }
 
 //save a given file to the disc if there are enough space
-void saveFileToDisk(FILE *Main_Memory, FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[50], int org, int inter, int FB, int NumBlocsFile, 
-        int NumRecordsFile, int NumberFile){
+void saveFileToDisk(FILE *Main_Memory, FILE *File, FILE *MS, FILE*HEAD, FILE *META, char filename[50], int org, int inter, int FB, 
+        int NumBlocsFile, int NumRecordsFile, int NumberFile){
     
     rewind(MS);
     rewind(HEAD);
@@ -1023,14 +1023,14 @@ void PopulateFile(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int filenu
 }    
 
 // Fonction pour la défragmentation
-void defragment_file(FILE *Main_Memory, FILE *MS, FILE *HEAD, FILE *META, DataFile *File, int NumberBlocMax, int NumberFile) {
+void defragment_file(FILE *Main_Memory, FILE *MS, FILE *HEAD, FILE *META, DataFile File, int NumberBlocMax, int NumberFile) {
     // Charger les métadonnées
     Meta meta;
-    fseek(META, sizeof(Meta) * File->id, SEEK_SET);
+    fseek(META, sizeof(Meta) * File.id, SEEK_SET);
     fread(&meta, sizeof(Meta), 1, META);
 
     if (meta.filesizeBloc <= 0) {
-        printf("Erreur : Le fichier '%s' n'existe pas ou est vide.\n", File->name);
+        printf("Erreur : Le fichier '%s' n'existe pas ou est vide.\n", File.name);
         return;
     }
 
@@ -1055,7 +1055,7 @@ void defragment_file(FILE *Main_Memory, FILE *MS, FILE *HEAD, FILE *META, DataFi
     }
 
     if (new_start_block == -1) {
-        printf("Erreur : Pas d'espace libre pour défragmenter '%s'.\n", File->name);
+        printf("Erreur : Pas d'espace libre pour défragmenter '%s'.\n", File.name);
         free(allocation_table);
         return;
     }
@@ -1088,14 +1088,14 @@ void defragment_file(FILE *Main_Memory, FILE *MS, FILE *HEAD, FILE *META, DataFi
 
     // Mise à jour des métadonnées
     meta.firstBlocaddress = new_start_block;
-    fseek(META, sizeof(meta) * File->id, SEEK_SET);
+    fseek(META, sizeof(meta) * File.id, SEEK_SET);
     fwrite(&meta, sizeof(meta), 1, META);
 
     // Mise à jour de la table d'allocation
     fseek(HEAD, sizeof(MsHead), SEEK_SET);
     fwrite(allocation_table, sizeof(int), NumberBlocMax, HEAD);
 
-    printf("Fichier '%s' défragmenté avec succès.\n", File->name);
+    printf("Fichier '%s' défragmenté avec succès.\n", File.name);
 
     free(allocation_table);
 
@@ -1124,7 +1124,10 @@ void main(){
         Record RecordBuffer;
 
         //VARIABLES--------
-        Bloc* Bloc;
+        Bloc* Blocs;
+        Meta* Metas;
+        MsHead* Head;
+
         int NumberBloc;
         int FB;
         int Org;
@@ -1134,7 +1137,7 @@ void main(){
         int lenghtFreeBlocArray; 
         int NumBlocsFile;
         int NumRecordsFile;
-        int* BlocsId;
+        int BlocsId;
         char data;
         int recordID;
         int i = 0;
@@ -1143,6 +1146,9 @@ void main(){
         int BlocId;
         int FileNumber;
         int RecordNumber;
+        int FileId;
+
+        char filename[50];
 
 
        
@@ -1186,14 +1192,45 @@ void main(){
             
         case 1:
             printf("Initializing system...\n");
+            printf("entering \nthe number of blocs wanted  : ");
+            scanf("%d", &NumberBloc);
+
+            Blocs = (Bloc*)malloc(NumberBloc * sizeof(Bloc));
+            Head->alloca = (int*)malloc(NumberBloc * sizeof(int));
+
+            printf("\nnumber of record in one bloc  :  ");
+            scanf("%d", &FB);
+            printf("\n external organisation type (1 = chained  2 = contigus)  :  ");
+            scanf("%d", &Org);
+            printf("\n internal organisation type (1 = sorted  2 = not sorted )  :  ");
+            scanf("%d", &inter);
+
+            initializeDisk(NumberBloc, FB, Org, inter);
             break;
         case 2:
             printf("Creating a new file...\n");
+            printf("how many file are you willing to store at maximum  :  ");
+            scanf("%d", &NumberFile);
+
+            Metas = (Meta*)malloc(NumberFile * sizeof(Meta));
+
+            CreatMS(Main_Memory, FB,NumberBloc, NumberFile, Org);
             break;
         case 3:
             printf("Please enter the ID of the file you want to automatically fill :\n");
+            break;
         case 4:
             printf("Renaming a file...\n");
+            char NewName[50];
+            printf("enter the Id of your file  : ");
+            scanf("%d", &FileBuffer.id);
+            printf("enter the old name of your file  :  ");
+            scanf("%d", &FileBuffer.name);
+            printf("enter the new name of your file  :  ");
+            scanf("%s", &NewName);
+
+            renameFile(Main_Memory, MS, HEAD, META, FileBuffer, NewName, NumberFile);
+
             break;
         case 5:
             printf("Adding a record...\n");
@@ -1202,7 +1239,7 @@ void main(){
             printf("please enter the record data");
             scanf("%c", &BlocBuffer.Data[0].data);
             printf("\n enter the data you want to insert  : ");
-            scanf("%c", RecordBuffer.data);
+            scanf("%c", &RecordBuffer.data);
             
             insertRecord(Main_Memory, MS, HEAD, META, NumberFile, BlocId + 1, FB, RecordBuffer, NumberBloc);
 
@@ -1244,18 +1281,55 @@ void main(){
             break;
         case 9:
             printf("Defragmenting...\n");
+
+            for(int i =0;i<NumberFile; i++){
+                fread(&MetaBuffer, sizeof(MetaBuffer), 1, META);
+                strcpy(FileBuffer.name, MetaBuffer.FileName);
+                FileBuffer.id = MetaBuffer.FileId;
+                defragment_file(Main_Memory, MS, HEAD, META, FileBuffer, NumberFile, NumberBloc);
+            }
+            
             break;
         case 10:
             printf("Printing file content...\n");
+            printf("enter the id of your file  :  ");
+            scanf("%d", &FileBuffer.id);
+
+            printFileContent(MS, HEAD, META, Org, inter, FB, FileBuffer.id);
             break;
         case 11:
             printf("Saving file to disk...\n");
+            char FilePath[50];
+            printf("give the file path  :  ");
+            scanf("%s", &FilePath);
+
+            FILE* File;
+            File = fopen(&FilePath, "rt");
+
+            printf("name your file  :  ");
+            scanf("%s", &filename);
+
+            saveFileToDisk(Main_Memory, File, MS, HEAD, META, filename, Org, inter, FB, NumBlocsFile, NumRecordsFile, NumberFile);
+
             break;
         case 12:
             printf("Please enter the name of the file you want to delete :\n");
+            scanf("%s", &filename);
+            printf("enter the id of your file  :  ");
+            scanf("%d", &FileId);
+
+            fread(&Head, sizeof(Head), 1, Main_Memory);
+            fread(&Metas, sizeof(Metas), 1, Main_Memory);
+            fread(&Blocs, sizeof(Blocs), 1, Main_Memory);
+
+            DeleteFile(filename, FileId, Head, Metas, Blocs);
+
             break;
         case 13:
             printf("Clearing memory structure...\n");
+
+            freeMS(Main_Memory, File, MS, HEAD, META, Org, NumberFile);
+
             break;
         case 14:
             printf("Exiting the program. Goodbye!\n");
