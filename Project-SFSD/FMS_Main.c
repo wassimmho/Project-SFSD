@@ -829,18 +829,17 @@ Bloc* loadFileFromDisk(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int org, 
     fseek(META, File.id * sizeof(MetaBuffer), SEEK_SET);
     fread(&MetaBuffer, sizeof(MetaBuffer), 1, META); 
     
-    Bloc BlocBuffer[MetaBuffer.filesizeBloc];
-
+    Bloc* BlocBuffer = (Bloc*)malloc(MetaBuffer.filesizeBloc * sizeof(Bloc));
+    
     int i =0, j =0;
     int nrf = MetaBuffer.filesizeRecord;
     int nbf = MetaBuffer.filesizeBloc;
 
-    fseek(MS, MetaBuffer.firstBlocaddress * sizeof(BlocBuffer), SEEK_SET);
+    fseek(MS, MetaBuffer.firstBlocaddress * sizeof(BlocBuffer[i]), SEEK_SET);
     
-
     while(i <= nbf){
         while(j <= nrf){
-            fread(&BlocBuffer[i].Data[j], sizeof(BlocBuffer[i].Data[j]), 1, MS);
+            fread(&BlocBuffer[i].Data, sizeof(BlocBuffer[i].Data[j]), 1, MS);
             if(j == FB || j == nrf){
                 i ++;
                 j =0;
@@ -1238,7 +1237,7 @@ void main(){
             while (getchar() != '\n'); // Clear the input buffer
         }while(NumberFile <= 0);
 
-        DataFile Files[NumberFile];
+        DataFile* Files = (DataFile*)malloc(NumberFile * sizeof(DataFile));
     //---------------------------
 
     printf("\n \n \n ---------- ENTERING TERMINAL ----------------");
