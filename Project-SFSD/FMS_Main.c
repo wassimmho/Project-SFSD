@@ -1228,7 +1228,7 @@ void main(){
             fread(&Metas, sizeof(Metas), 1, Main_Memory);
             fread(&Blocs, sizeof(Blocs), 1, Main_Memory);
 
-            PopulateFile(Main_Memory, MS, HEAD, META, NumberFile, Head, Metas, Blocs, FB, NumberBloc, NumberFile);
+            PopulateFile(Main_Memory, MS, HEAD, META, NumberFile, Head, Metas, Blocs, RecordNumber, FB, NumberBloc, NumberFile);
 
             break;
         case 4:
