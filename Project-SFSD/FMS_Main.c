@@ -1185,6 +1185,7 @@ void main(){
         MsHead* head = NULL;
 
         //VARIABLES--------
+        Bloc* Bloc;
         int NumberBloc;
         int FB;
         int Org;
@@ -1257,7 +1258,7 @@ void main(){
             scanf("%d", &NumberFile);
             printf("please enter the record data");
             scanf("%c", &BlocBuffer.Data[0].data);
-            insertRecord(head,NumberFile,BlocBuffer.Data[0].data,&FB);
+            insertRecord(MetaBuffer, head, NumberFile, BlocBuffer.Data[0].data , &FB);
             break;
         case 6:
             printf("Searching for record by ID...\n");
@@ -1266,7 +1267,7 @@ void main(){
             printf("please enter the record ID: ");
             scanf("%d", &IdOfFile);
             int blockNum, recordNum;
-            searchRecord(MetaBuffer, head, NumberFile, IdOfFile, &FB, &blockNum, &recordNum);
+            searchRecord(MetaBuffer, head, Bloc, NumberFile, IdOfFile, &FB, &blockNum, &recordNum);
             break;
         case 7:
             printf("Logically deleting a record...\n");
@@ -1274,10 +1275,15 @@ void main(){
             scanf("%d", &NumberFile);
             printf("please enter the record ID: ");
             scanf("%d", &IdOfFile);
-            deleteRecord(head, NumberFile, IdOfFile, &FB);
+            deleteRecord(MetaBuffer, head, Bloc, NumberFile, IdOfFile, &FB);
             break;
         case 8:
             printf("Physically deleting a record...\n");
+            printf("please enter the file number that you want to delete a record: ");
+            scanf("%d", &NumberFile);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            physicallyDeleteRecord(head, NumberFile, IdOfFile, &FB);
             break;
         case 9:
             printf("Defragmenting...\n");
