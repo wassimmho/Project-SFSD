@@ -49,10 +49,6 @@ typedef struct DataFile{
 
 
 
-
-/*-------------------------------------- FAHD PART (AND WASSIM )---------------------------------------------------*/
-
-
 //updating and saving changes to the main memory
 void saveMs(FILE *MS, FILE *HEAD, FILE *META, FILE *Main_Memory, int NumFiles, int saveChoice){
     rewind(MS);
@@ -853,10 +849,6 @@ Bloc* loadFileFromDisk(FILE *MS, FILE*HEAD, FILE *META, DataFile File, int org, 
 
 }
 
-/*----------------------------------------------------------------------------------------------------*/
-
-
-/*-------------------------------------- MOZALI PART -------------------------------------------------*/
 
 void insertRecord(Meta* meta, Bloc* Block, int filenumber, char data, int* FB) {
     Bloc buffer = Block[filenumber];  // Create buffer from the Bloc array
@@ -955,6 +947,7 @@ void deleteRecord(MsHead* head, Meta* meta, Bloc* Block, int filenumber, int rec
     }
     printf("Record with ID %d not found.\n", recordID);
 }
+
 void physicalDeleteRecord(MsHead* head, Meta* meta, Bloc* Block, int filenumber, int recordID, int* FB) {
     if (filenumber >= head->numberoffiles) {
         printf("Invalid file number.\n");
@@ -989,14 +982,6 @@ void physicalDeleteRecord(MsHead* head, Meta* meta, Bloc* Block, int filenumber,
         printf("Record with ID %d not found or already deleted.\n", recordID);
     }
 }
-
-/*----------------------------------------------------------------------------------------------------*/
-
-
-
-
-
-/*-------------------------------------- Mehdi's Part --------------------------------------------------*/
 
 void DeleteFile(char name[50], int numoffile, MsHead* head,  Meta* meta, Bloc* Bloc){
 
@@ -1047,9 +1032,6 @@ void DeleteFile(char name[50], int numoffile, MsHead* head,  Meta* meta, Bloc* B
     return ;
 
 }
-
-
-
 
 void PopulateFile(int filenumber, int numofrecord, MsHead* head, Meta* meta, Bloc* Bloc, int* FB){
 
@@ -1102,16 +1084,6 @@ void PopulateFile(int filenumber, int numofrecord, MsHead* head, Meta* meta, Blo
     
 }    
 
-
-
-
-/*----------------------------------------------------------------------------------------------------*/
-
-
-
-
-
-/*-------------------------------------- STAMBOULI PART ----------------------------------------------*/
 // Fonction pour la défragmentation
 void defragment_file(FILE *Main_Memory, FILE *MS, FILE *HEAD, FILE *META, DataFile *File, int NumberBlocMax, int NumberFile) {
     // Charger les métadonnées
@@ -1191,9 +1163,6 @@ void defragment_file(FILE *Main_Memory, FILE *MS, FILE *HEAD, FILE *META, DataFi
 
     saveMs(MS, HEAD, META, Main_Memory, NumberFile, 4);
 }
-
-
-/*--------------------------------------------------------------------------------------------------*/
 
 
 
