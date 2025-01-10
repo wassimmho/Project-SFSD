@@ -891,7 +891,7 @@ void insertRecord(Meta* meta, Bloc* Bloc, int filenumber, char data, int* FB) {
     printf("New block allocated and record inserted successfully.\n");
 }
 
-Record searchRecord(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int FileNumber, int RecordNumber, int* FB) {
+Record searchRecord(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int FileNumber, int RecordNumber, int FB) {
     rewind(MS);
     rewind(HEAD);
     rewind(META);
@@ -928,11 +928,11 @@ void deleteRecord (FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, int Numbe
     Record RecordBuffer;
 
     fseek(MS, (recordID + BlocId *FB) * sizeof(RecordBuffer), SEEK_SET);
-    fread(&RecordBuffer, siseof(RecordBuffer), 1, MS);
+    fread(&RecordBuffer, sizeof(RecordBuffer), 1, MS);
 
     RecordBuffer.deleted = true;
     fseek(MS, - sizeof(RecordBuffer), SEEK_SET);
-    fwrite(&RecordBuffer, siseof(RecordBuffer), 1, MS);
+    fwrite(&RecordBuffer, sizeof(RecordBuffer), 1, MS);
 
     printf("Record with ID %d not found.\n", recordID);
 
@@ -947,15 +947,15 @@ void physicalDeleteRecord(FILE *Main_Memory, FILE *MS, FILE*HEAD, FILE *META, in
     Record RecordBuffer;
 
     fseek(MS, BlocId * sizeof(BlocBuffer) + recordID * sizeof(RecordBuffer), SEEK_SET);
-    fread(&RecordBuffer, siseof(RecordBuffer), 1, MS);
+    fread(&RecordBuffer, sizeof(RecordBuffer), 1, MS);
 
     for(int i =recordID; i< FB - 1; i++){
         BlocBuffer.Data[i] = BlocBuffer.Data[i + 1];
-        fwrite(&RecordBuffer, siseof(RecordBuffer), 1, MS);
+        fwrite(&RecordBuffer, sizeof(RecordBuffer), 1, MS);
     }
 
     BlocBuffer.Data[FB].data = '\0';
-    fwrite(&RecordBuffer, siseof(RecordBuffer), 1, MS);
+    fwrite(&RecordBuffer, sizeof(RecordBuffer), 1, MS);
     
     saveMs(MS, HEAD, META, Main_Memory, NumberFile, 3);
 }
@@ -1155,16 +1155,19 @@ void main(){
 
         // BUFFERS------
         Bloc BlocBuffer;
-        Meta MetaBuffer;
+        Meta* MetaBuffer;
         MsHead HeadBuffer;
         DataFile FileBuffer;
+        MsHead* head = NULL;
 
         //VARIABLES--------
+        Bloc* Bloc;
         int NumberBloc;
         int FB;
         int Org;
         int inter;
         int NumberFile;
+        int IdOfFile;
         int lenghtFreeBlocArray; 
         int NumBlocsFile;
         int NumRecordsFile;
@@ -1173,6 +1176,10 @@ void main(){
         int recordID;
         int i = 0;
         int TaskChoice;
+
+
+       
+       
 
         //FILES-------(MS ,HEAD and META are created with creatMS() use it to creat them)---------
         DataFile File;
@@ -1223,15 +1230,36 @@ void main(){
             break;
         case 5:
             printf("Adding a record...\n");
+            printf("please enter the file number that you want to add a record");
+            scanf("%d", &NumberFile);
+            printf("please enter the record data");
+            scanf("%c", &BlocBuffer.Data[0].data);
+            insertRecord(MetaBuffer, head, NumberFile, BlocBuffer.Data[0].data , &FB);
             break;
         case 6:
             printf("Searching for record by ID...\n");
+            printf("please enter the file number that you want to search a record: ");
+            scanf("%d", &NumberFile);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            int blockNum, recordNum;
+            searchRecord(MetaBuffer, head, Bloc, NumberFile, IdOfFile, &FB, &blockNum, &recordNum);
             break;
         case 7:
             printf("Logically deleting a record...\n");
+             printf("please enter the file number that you want to delete a record: ");
+            scanf("%d", &NumberFile);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            deleteRecord(MetaBuffer, head, Bloc, NumberFile, IdOfFile, &FB);
             break;
         case 8:
             printf("Physically deleting a record...\n");
+            printf("please enter the file number that you want to delete a record: ");
+            scanf("%d", &NumberFile);
+            printf("please enter the record ID: ");
+            scanf("%d", &IdOfFile);
+            physicallyDeleteRecord(head, NumberFile, IdOfFile, &FB);
             break;
         case 9:
             printf("Defragmenting...\n");
